@@ -1,14 +1,15 @@
 .posts
   h2.title Posts
-  .post.create_another_one
-    h1 Posts#new
+  .create_another_one
+    h1 Add a new post
     /p Find me in app/views/poswefwefwts/new.html.slim
-    = form_for @post do |f|
-      = f.text_field :theme
-      = f.text_area :text
-      = f.submit 'create post'
+    .form-group
+      = form_for @post, :html => {:class => "form-horizontal center"} do |f|
+        = f.text_field :theme, class: 'form-control', placeholder:'Theme'
+        = f.text_area :text, class: 'form-control', placeholder:'text'
+        = f.submit 'create post', class: 'btn btn-primary form-control'
   /p.where-i-find-this Find me in app/views/posts/index.html.slim
   - @posts.each do |post|
     .post.jumbotron
       h3 = post.theme
-      p.border  = post.text
+      p.border.post_text  = post.text

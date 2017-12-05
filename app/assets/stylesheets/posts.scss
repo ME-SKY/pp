@@ -13,22 +13,17 @@
   left: 25%;
 }
 .post{
+
+  padding: 10px;
   display: block;
   height: auto;
-  width: 100%;
-  overflow-wrap: normal;  /* не поддерживает IE, Firefox; является копией word-wrap */
+  width: auto;
+  overflow-wrap: normal;
   word-wrap: normal;
   word-break: break-all;
   box-sizing: content-box;
   .post_text{
-    //
-    //box-sizing: content-box;
-    //text-outline: center;
     text-align: justify;
-    //text
   }
-  //padding-top: 10px !important;
-  //padding-bottom: 5px;
-  //text_align: auto;
 }
 

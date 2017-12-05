@@ -7,7 +7,7 @@
       = form_for @post, :html => {:class => "form-horizontal center"} do |f|
         = f.text_field :theme, class: 'form-control', placeholder:'Theme'
         = f.text_area :text, class: 'form-control', placeholder:'text'
-        = f.submit 'create post', class: 'btn btn-primary form-control'
+        = f.submit 'create post', class: 'btn btn-success form-control'
   /p.where-i-find-this Find me in app/views/posts/index.html.slim
   - @posts.each do |post|
     .post.jumbotron

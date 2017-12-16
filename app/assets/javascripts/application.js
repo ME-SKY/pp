@@ -11,5 +11,10 @@
 // about supported directives.
 //
 //= require rails-ujs
+//= require jquery3
+//= require jquery_ujs
 //= require turbolinks
+//= require foundation
 //= require_tree .
+$(document).foundation();
+$(function(){ $(document).foundation(); });

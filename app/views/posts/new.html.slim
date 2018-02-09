@@ -3,5 +3,6 @@ h1 Posts#new
 = form_for @post do |f|
   = f.text_field :theme
   = f.text_area :text
+  = f.file_field :attachment
   = f.submit 'create post'
 

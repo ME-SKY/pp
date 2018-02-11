@@ -12,6 +12,7 @@ class PostsController < ApplicationController
     @post = Post.create(theme: params[:post][:theme], text: params[:post][:text])
     respond_to do |format|
       if @post.save
+        Attachment.create(file: params[:post][:attachment], post_id: @post.id)
         format.html { redirect_to action: :index}
         format.json { render :show, status: :created, location: @post }
       else

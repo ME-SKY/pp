@@ -8,27 +8,47 @@
     text-align: center;
 }
 .posts{
-  width: 50%;
+  //justify-content: center;
+  //display: flex;
+  //flex-direction: column;
+  //width: 30%;
+  //margin: 0;
   //position: absolute;
   //left: 25%;
 
   article{
+    //width: 30%;
     margin-bottom: 30px;
     position: relative;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+  }
+}
+
+.post-header {
+  img {
+    width: 400px;
+    max-width: 300px !important;
   }
 }
 .post{
+  p{
+    font-family: "Helvetica Neue",HelveticaNeue,Arial,sans-serif;
+  }
+
   margin: 5px;
   //background: #d6f5f4;
   padding: 10px;
   display: block;
-  height: auto;
-  width: auto;
+  //height: 200px;
+  //width: 300px;
   overflow-wrap: normal;
   word-wrap: normal;
   word-break: break-all;
   box-sizing: content-box;
   .post_text{
+    font-family: "Helvetica Neue",HelveticaNeue,Arial,sans-serif !important;
     text-align: justify;
   }
 }

@@ -5,5 +5,5 @@ class Attachment < ApplicationRecord
 
   belongs_to :post, optional: true
   mount_uploader :file, AttachmentUploader
-  validates :file, file_size: {maximum: FILE_SIZE_LIMIT}
+  # validates :file, file_size: {maximum: FILE_SIZE_LIMIT}
 end

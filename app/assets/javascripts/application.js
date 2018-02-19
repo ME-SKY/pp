@@ -15,6 +15,16 @@
 //= require jquery_ujs
 //= require turbolinks
 //= require foundation
+//= require ckeditor/init
 //= require_tree .
+
+
 $(document).foundation();
 $(function(){ $(document).foundation(); });
+alert('otsos');
+
+// ClassicEditor
+//     .create( document.querySelector( '#editor' ) )
+//     .catch( error => {
+//         console.error( error );
+//     } );

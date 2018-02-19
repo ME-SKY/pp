@@ -8,32 +8,24 @@
 // layout file, like app/views/layouts/application.html.erb
 
 console.log('Hello World from Webpacker');
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
-import Quill from 'quill/core';
-
-import Toolbar from 'quill/modules/toolbar';
-import Snow from 'quill/themes/snow';
-
-import Bold from 'quill/formats/bold';
-import Italic from 'quill/formats/italic';
-import Header from 'quill/formats/header';
+// import ClassicEditor from 'ckeditor/classic_editor';
 
 
-Quill.register({
-    'modules/toolbar': Toolbar,
-    'themes/snow': Snow,
-    'formats/bold': Bold,
-    'formats/italic': Italic,
-    'formats/header': Header
-});
+document.onreadystatechange = function(){
+    if(document.readyState === 'complete'){
+        ClassicEditor
+            .create( document.querySelector( '#editor' ) )
+            .then( editor => {
+                console.log( editor );
+            } )
+            .catch( error => {
+                console.error( error );
+            } );
+    }
+};
 
-alert('appliction.js is works');
-export default Quill;
 
-function quilifyte (){
-    quill = new Quill('#editor', {
-        theme: 'snow'
-    });
-}
 
 

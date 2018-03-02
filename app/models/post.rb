@@ -13,6 +13,6 @@ class Post < ApplicationRecord
   end
 
   def header_img
-    attachments.last.file
+    attachments.last.file if attachments.present?
   end
 end

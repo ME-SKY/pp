@@ -6,34 +6,27 @@
 //
 // To reference this file, add <%= javascript_pack_tag 'application' %> to the appropriate
 // layout file, like app/views/layouts/application.html.erb
-
-console.log('Hello World from Webpacker');
-
-import Quill from 'quill/core';
-
-import Toolbar from 'quill/modules/toolbar';
-import Snow from 'quill/themes/snow';
-
-import Bold from 'quill/formats/bold';
-import Italic from 'quill/formats/italic';
-import Header from 'quill/formats/header';
+import Vue from 'vue/dist/vue.esm'
+// import Vue from 'vue'
+import App from '../app.vue'
 
 
-Quill.register({
-    'modules/toolbar': Toolbar,
-    'themes/snow': Snow,
-    'formats/bold': Bold,
-    'formats/italic': Italic,
-    'formats/header': Header
+document.addEventListener('DOMContentLoaded', () => {
+    var element = document.querySelector('#posts-block-vue');
+    // console.log(element.dataset.post);
+    if (element != undefined) {
+        const app = new Vue({
+            el: element,
+            data: {
+                posts: JSON.parse(element.dataset.posts)
+            },
+            template: "<App :original_posts='posts' />",
+            components: { App }
+            // template: "<div> otsos!!! </div>"
+        });
+    }
+    // const el = document.body.appendChild(document.createElement('hello'))
+
+
+    // console.log(app)
 });
-
-alert('appliction.js is works');
-export default Quill;
-
-function quilifyte (){
-    quill = new Quill('#editor', {
-        theme: 'snow'
-    });
-}
-
-

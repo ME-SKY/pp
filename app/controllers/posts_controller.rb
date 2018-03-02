@@ -2,6 +2,8 @@ class PostsController < ApplicationController
   def index
     @post = Post.new
     @posts = Post.all.order(updated_at: :desc)
+
+    # respond_to json
   end
 
   def new

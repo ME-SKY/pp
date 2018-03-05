@@ -9,6 +9,8 @@ html lang="en"
     = stylesheet_link_tag 'application', media: 'all'
     = javascript_include_tag 'application', 'data-turbolinks-track' => true
     = javascript_pack_tag 'application'
+    = javascript_pack_tag 'posts'
+    /= stylesheet_pack_tag 'app'
     /= javascript_pack_tag 'hello_vue'
     /= stylesheet_pack_tag 'hello_vue'
     /= javascript_pack_tag 'app2'
@@ -24,6 +26,8 @@ html lang="en"
     script src="//cdn.quilljs.com/1.3.5/quill.core.js"
 
   body
+    #app
+      == yield
     /button.button aria-controls="motion-example-1" data-toggle="motion-example-1" type="button"  Fade
     /
     /#motion-example-1.callout.secondary.ease aria-expanded="true" data-animate=("fade-in fade-out") data-toggler="j4j72y-toggler"
@@ -31,4 +35,4 @@ html lang="en"
     /    | This panel
     /      strong fades
 
-    == yield
+    /== yield

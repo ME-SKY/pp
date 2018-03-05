@@ -1,9 +1,9 @@
 class PostsController < ApplicationController
   def index
     @post = Post.new
-    @posts = Post.all.order(updated_at: :desc)
+    @posts = Post.all.includes(:attachments).order(updated_at: :desc)
 
-    # respond_to json
+    # render json: @posts
   end
 
   def new

@@ -2,65 +2,65 @@
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
 
-.title {
-    font: 1em "Source Code Pro", Monaco, monospace;
-    color: #de5c35;
-    text-align: center;
-}
-.posts{
-  //justify-content: center;
-  //display: flex;
-  //flex-direction: column;
-  //width: 30%;
-  //margin: 0;
-  //position: absolute;
-  //left: 25%;
-
-  article{
-    //width: 30%;
-    margin-bottom: 30px;
-    position: relative;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-  }
-}
-
-.post-header {
-  img {
-    width: 400px;
-    max-width: 300px !important;
-  }
-}
-.post{
-  p{
-    font-family: "Helvetica Neue",HelveticaNeue,Arial,sans-serif;
-  }
-
-  margin: 5px;
-  //background: #d6f5f4;
-  padding: 10px;
-  display: block;
-  //height: 200px;
-  //width: 300px;
-  overflow-wrap: normal;
-  word-wrap: normal;
-  word-break: break-all;
-  box-sizing: content-box;
-  .post_text{
-    font-family: "Helvetica Neue",HelveticaNeue,Arial,sans-serif !important;
-    text-align: justify;
-  }
-}
-
-.post-wrapper{
-  background: #fff;
-  border-radius: 6px;
-  overflow: hidden;
-  padding: 0;
-  position: relative;
-  background-clip: padding-box;
-  border: 1px solid #eee;
-  //border: 1px solid rgba(0,0,0,.08);
-}
+//.title {
+//    font: 1em "Source Code Pro", Monaco, monospace;
+//    color: #de5c35;
+//    text-align: center;
+//}
+//§
+//  //justify-content: center;
+//  //display: flex;
+//  //flex-direction: column;
+//  //width: 30%;
+//  //margin: 0;
+//  //position: absolute;
+//  //left: 25%;
+//
+//  article{
+//    //width: 30%;
+//    margin-bottom: 30px;
+//    position: relative;
+//    display: flex;
+//    flex-direction: row;
+//    justify-content: center;
+//  }
+//}
+//
+//.post-header {
+//  img {
+//    width: 400px;
+//    max-width: 300px !important;
+//  }
+//}
+//.post{
+//  p{
+//    font-family: "Helvetica Neue",HelveticaNeue,Arial,sans-serif;
+//  }
+//
+//  margin: 5px;
+//  //background: #d6f5f4;
+//  padding: 10px;
+//  display: block;
+//  //height: 200px;
+//  //width: 300px;
+//  overflow-wrap: normal;
+//  word-wrap: normal;
+//  word-break: break-all;
+//  box-sizing: content-box;
+//  .post_text{
+//    font-family: "Helvetica Neue",HelveticaNeue,Arial,sans-serif !important;
+//    text-align: justify;
+//  }
+//}
+//
+//.post-wrapper{
+//  background: #fff;
+//  border-radius: 6px;
+//  overflow: hidden;
+//  padding: 0;
+//  position: relative;
+//  background-clip: padding-box;
+//  border: 1px solid #eee;
+//  //border: 1px solid rgba(0,0,0,.08);
+//}
 

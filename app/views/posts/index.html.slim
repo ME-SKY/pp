@@ -1,6 +1,8 @@
+/      footer.post-footer
 .posts
   h2.title Posts
-  /.create_another_one
+  = tag.div id: 'posts-block', data: { posts: @posts.to_json(include: :attachments) }
+/.create_another_one
   /  h1 Add a new post
   /  /p Find me in app/views/poswefwefwts/new.html.slim
   /  .form-group
@@ -9,16 +11,14 @@
   /      = f.text_area :text, class: 'form-control', placeholder:'text'
   /      = f.submit 'create post', class: 'btn btn-success form-control'
   //p.where-i-find-this Find me in app/views/posts/index.html.slim
-  - @posts.each do |post|
-    /= tag.div id: 'post-block-vue', data: { post: post.to_json(include: :attachments) }
-    article.post-block
-      .post-wrapper
-        header.post-header
-          img src="#{post.header_img}"
-        section.post
-          .post-content
-            h3.title = post.theme
-            p.border.post_text = post.description_crop
-        section.additional-post-info
-        footer.post-footer
-= tag.div id: 'posts-block-vue', data: { posts: @posts.to_json(include: :attachments) }
+  /- @posts.each do |post|
+  /  /= tag.div id: 'post-block-vue', data: { post: post.to_json(include: :attachments) }
+  /  article.post-block
+  /    .post-wrapper
+  /      header.post-header
+  /        img src="#{post.header_img}"
+  /      section.post
+  /        .post-content
+  /          h3.title = post.theme
+  /          p.border.post_text = post.description_crop
+  /      section.additional-post-info

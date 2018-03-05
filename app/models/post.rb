@@ -8,8 +8,9 @@ class Post < ApplicationRecord
     if text.length > 181
       self.description = text.slice(0, 180) + '...'
     else
-      text
+      self.description = text
     end
+    # description
   end
 
   def header_img

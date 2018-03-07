@@ -3,7 +3,7 @@ class PostsController < ApplicationController
     @post = Post.new
     @posts = Post.all.includes(:attachments).order(updated_at: :desc)
 
-    # render json: @posts
+    render json: @posts, include: :attachments
   end
 
   def new

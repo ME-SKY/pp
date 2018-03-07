@@ -10,7 +10,7 @@ import Vue from 'vue/dist/vue.esm'
 // import Vue from 'vue'
 import PostsList from '../components/PostsList.vue'
 // import NewPost from '../components/NewPost.vue'
-import App from '../app.vue';
+// import App from '../app.vue';
 
 
 document.addEventListener('DOMContentLoaded', () => {

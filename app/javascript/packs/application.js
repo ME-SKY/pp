@@ -7,19 +7,37 @@
 // To reference this file, add <%= javascript_pack_tag 'application' %> to the appropriate
 // layout file, like app/views/layouts/application.html.erb
 import Vue from 'vue/dist/vue.esm'
+import VueRouter from 'vue-router'
+import VueResource from 'vue-resource'
 
 // import Vue from 'vue'
-// import PostsList from '../PostsList.vue'
+import PostsList from '../components/PostsList.vue'
 // import NewPost from '../components/NewPost.vue'
 import App from '../app.vue';
 
+Vue.use(VueRouter)
+Vue.use(VueResource)
 
-document.addEventListener('DOMContentLoaded', () => {
-    new Vue({
-        el: '#app'
-        // template: '<app/>',
-        // components: { App }
-    });
+// const routes = [
+//     { path: '/posts', component: PostsList }
+// ]
+
+// const router = new VueRouter({
+//     routes
+// })
+
+// const el = document.body.appendChild(document.createElement('application'))
+new Vue({
+    // router,
+    ...App
+    // created: function(){
+    //     this.getAllPosts()
+    // }
+    // template: '<app/>',
+    // components: { App }
+}).$mount('#app')
+
+// console.log($data)
     // var posts_block = document.querySelector('#posts-block-vue');
     // // console.log(element.dataset.post);
     // if (posts_block != undefined) {
@@ -40,4 +58,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // console.log(app)
-});

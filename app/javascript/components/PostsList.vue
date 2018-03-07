@@ -1,6 +1,7 @@
 <template>
-  <div>
-    <div v-for="post in original_posts">
+  <div class="postslistclass">
+    <!--{{ all_posts }}-->
+    <div v-for="post in all_posts" class="one_post">
       <article class="post-block">
         <div class="post-wrapper">
           <header class="post-header">
@@ -22,20 +23,48 @@
 </template>
 
 <script>
+
 export default {
- props: ["original_posts"],
- methods: {
+  data: function(){
+    return {
+      all_posts: []
+    }
+  },
+  methods: {
    post_header_image_url: function(postik) {
+//     console.log(postik)
      if(postik.attachments.length != 0){
-       console.log(postik);
+//       console.log(postik);
        return postik['attachments']['0']['file']['url'];
      }
+   },
+//   post_info: function(post){
+//     return post
+//   },
+   get_posts: function(){
+     this.$http.get('/posts').then(function(responce) {
+//       console.log(responce)
+       this.all_posts = responce.body
+//       return responce[]
+//       return { responce_body: responce.body }
+     }, function(error){
+       // error
+     })
    }
+ },
+ created: function() {
+   this.get_posts()
  }
 }
+
 </script>
 
 <style lang="scss" scoped >
+
+/*.one_post{*/
+  /*width: 30px;*/
+  /*height: 20px;*/
+/*}*/
 .title {
   font: 1em "Source Code Pro", Monaco, monospace;
   color: #de5c35;

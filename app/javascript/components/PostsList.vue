@@ -1,32 +1,36 @@
 <template>
-  <div class="postslistclass">
-    <!--{{ all_posts }}-->
-    <div v-for="post in all_posts" class="one_post">
-      <article class="post-block">
-        <div class="post-wrapper">
-          <header class="post-header">
-            <h3 class="hmg"></h3>
-            <img :src= "post_header_image_url(post)" >
-          </header>
-          <section class="post">
-            <div class="post-content">
-              <h3 class="title">{{ post.theme }}</h3>
-              <p class="border post_text"> {{ post.description }}</p>
-            </div>
-          </section>
-          <section class="additional-post-info"></section>
-          <footer class="post-footer"></footer>
+    <div class="postslistclass">
+        <div id="trumbo_editor">
+            <trumbowyg v-model="content" :config="config" svgPath="false" :svgPath="false" class="form-control" name="content"></trumbowyg>
         </div>
-      </article>
+        <div v-for="post in all_posts" class="one_post">
+            <one-post-comp :image_post_url="post_header_image_url(post)"
+                           :theme="post.theme"
+                           :description="post.description"/>
+        </div>
     </div>
-  </div>
 </template>
 
 <script>
+//  import Trumbo from '../../../node_modules/trumbowyg/dist/trumbowyg.min.js';
+//  $('#trumbo_editor').trumbowyg();
+//  alert($('#trumbo_editor').length)
+//  import trumbowyg from 'vue-trumbowyg'
+//  import 'trumbowyg/dist/ui/trumbowyg.css'
+  import OnePost from './one_post'
+//import OnePost from 'OnePost.vue
+$('.form-control').trumbowyg({
+    svgPath: false // or a path like '/assets/my-custom-path/icons.svg'
+});
 
 export default {
+  components: {
+    'one-post-comp': OnePost
+  },
   data: function(){
     return {
+      content: '',
+      config: {},
       all_posts: []
     }
   },
@@ -60,59 +64,61 @@ export default {
 </script>
 
 <style lang="scss" scoped >
-
+    /*@import '../../../node_modules/trumbowyg/dist/ui/trumbowyg.min.css';*/
 /*.one_post{*/
   /*width: 30px;*/
   /*height: 20px;*/
 /*}*/
-.title {
-  font: 1em "Source Code Pro", Monaco, monospace;
-  color: #de5c35;
-  text-align: center;
-}
+/*.title {*/
+  /*font: 1em "Source Code Pro", Monaco, monospace;*/
+  /*color: #de5c35;*/
+  /*text-align: center;*/
+/*}*/
 
-article{
-  margin-bottom: 30px;
-  position: relative;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-}
+/*article{*/
+  /*margin-bottom: 30px;*/
+  /*position: relative;*/
+  /*display: flex;*/
+  /*flex-direction: row;*/
+  /*justify-content: center;*/
+/*}*/
 
 
-.post-header{
-    img {
-      width: 400px;
-      max-width: 300px !important;
-    }
-}
+/*.post-header{*/
+    /*img {*/
+      /*width: 400px;*/
+      /*max-width: 300px !important;*/
+    /*}*/
+/*}*/
 
-.post{
-  p{
-    font-family: "Helvetica Neue",HelveticaNeue,Arial,sans-serif;
-  }
+/*.post{*/
+  /*p{*/
+    /*font-family: "Helvetica Neue",HelveticaNeue,Arial,sans-serif;*/
+  /*}*/
 
-  margin: 5px;
-  padding: 10px;
-  display: block;
-  overflow-wrap: normal;
-  word-wrap: normal;
-  word-break: break-all;
-  box-sizing: content-box;
+  /*margin: 5px;*/
+  /*padding: 10px;*/
+  /*display: block;*/
+  /*overflow-wrap: normal;*/
+  /*word-wrap: normal;*/
+  /*word-break: break-all;*/
+  /*box-sizing: content-box;*/
 
-  .post_text{
-    font-family: "Helvetica Neue",HelveticaNeue,Arial,sans-serif !important;
-    text-align: justify;
-  }
-}
+  /*.post_text{*/
+    /*font-family: "Helvetica Neue",HelveticaNeue,Arial,sans-serif !important;*/
+    /*text-align: justify;*/
+  /*}*/
+/*.post-wrapper{*/
+  /*background: #fff;*/
+  /*border-radius: 6px;*/
+  /*overflow: hidden;*/
+  /*padding: 0;*/
+  /*position: relative;*/
+  /*background-clip: padding-box;*/
+  /*border: 1px solid #eee;*/
 
-.post-wrapper{
-  background: #fff;
-  border-radius: 6px;
-  overflow: hidden;
-  padding: 0;
-  position: relative;
-  background-clip: padding-box;
-  border: 1px solid #eee;
-}
+
+/*}*/
+/*}*/
+
 </style>

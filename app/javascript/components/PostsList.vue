@@ -1,8 +1,7 @@
 <template>
     <div class="postslistclass">
-        <div id="trumbo_editor">
-            <trumbowyg v-model="content" :config="config" svgPath="false" :svgPath="false" class="form-control" name="content"></trumbowyg>
-        </div>
+        <!--<quill-editor/>-->
+        <editor-aga/>
         <div v-for="post in all_posts" class="one_post">
             <one-post-comp :image_post_url="post_header_image_url(post)"
                            :theme="post.theme"
@@ -18,20 +17,51 @@
 //  import trumbowyg from 'vue-trumbowyg'
 //  import 'trumbowyg/dist/ui/trumbowyg.css'
   import OnePost from './one_post'
+  import EditorAga from './editor_aga'
+//import { quillEditor } from 'vue-quill-editor'
+//import 'quill/dist/quill.core.css'
+//import themeShow from  'quill/dist/quill.snow.css'
+//import 'quill/dist/quill.bubble.css'
+//import { Snow } from 'quill/dist/quill.snow.css'
+//quillEditor.register({
+//    'modules/toolbar': Toolbar,
+//    'themes/snow': Snow
+//    'formats/bold': Bold,
+//    'formats/italic': Italic,
+//    'formats/header': Header
+//})
+
+//VueQuillEditor.register({theme: themeShow})
 //import OnePost from 'OnePost.vue
-$('.form-control').trumbowyg({
-    svgPath: false // or a path like '/assets/my-custom-path/icons.svg'
-});
 
 export default {
   components: {
-    'one-post-comp': OnePost
+    'one-post-comp': OnePost,
+    'editor-aga': EditorAga
+//    'quill-editor-vue': quillEditor({'themes/show': Show})
   },
   data: function(){
     return {
-      content: '',
-      config: {},
-      all_posts: []
+//        content: '<h2 class="ql-align-center"><span class="ql-font-serif">Text content loading..</span></h2>',
+//        editorOption: {
+//            modules: {
+//                toolbar: [
+//                    ['bold', 'italic', 'underline', 'strike'],
+//                    ['blockquote', 'code-block'],
+//                    [{ 'header': 1 }, { 'header': 2 }],
+//                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+//                    [{ 'script': 'sub' }, { 'script': 'super' }],
+//                    [{ 'indent': '-1' }, { 'indent': '+1' }],
+//                    [{ 'direction': 'rtl' }],
+//                    [{ 'size': ['small', false, 'large', 'huge'] }],
+//                    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+//                    [{ 'font': [] }],
+//                    [{ 'color': [] }, { 'background': [] }],
+//                    [{ 'align': [] }],
+//                    ['clean'],
+//                    ['link', 'image', 'video']
+//                ]}},
+        all_posts: []
     }
   },
   methods: {

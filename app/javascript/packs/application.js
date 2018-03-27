@@ -21,15 +21,64 @@ import Vue from 'vue/dist/vue.esm'
 // import Trumbo from '../../../node_modules/trumbowyg/dist/trumbowyg.min.js'
 import VueRouter from 'vue-router'
 import VueResource from 'vue-resource'
-import VueTrumbowyg from 'vue-trumbowyg';
-import 'trumbowyg/dist/ui/trumbowyg.css';
-import 'trumbowyg/dist/ui/icons.svg'
-$.trumbowyg.svgPath = false;
-VueTrumbowyg.svgPath = false;
-Vue.use(VueTrumbowyg);
+import VueQuillEditor from 'vue-quill-editor'
+// import Quill from 'quill/core';
+//
+// import Toolbar from 'quill/modules/toolbar';
+// import Snow from 'quill/themes/snow';
+//
+// import Bold from 'quill/formats/bold';
+// import Italic from 'quill/formats/italic';
+// import Header from 'quill/formats/header';
+//
+//
+// Quill.register({
+//     'modules/toolbar': Toolbar,
+//     'themes/snow': Snow,
+//     'formats/bold': Bold,
+//     'formats/italic': Italic,
+//     'formats/header': Header
+// });
+//
+// Vue.use(VueQuillEditor, {
+//     theme: 'show',
+//     modules: {
+//         toolbar: [
+//             ['bold', 'italic', 'underline', 'strike'],
+//             ['blockquote', 'code-block'],
+//             [{ 'header': 1 }, { 'header': 2 }],
+//             [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+//             [{ 'script': 'sub' }, { 'script': 'super' }],
+//             [{ 'indent': '-1' }, { 'indent': '+1' }],
+//             [{ 'direction': 'rtl' }],
+//             [{ 'size': ['small', false, 'large', 'huge'] }],
+//             [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+//             [{ 'font': [] }],
+//             [{ 'color': [] }, { 'background': [] }],
+//             [{ 'align': [] }],
+//             ['clean'],
+//             ['link', 'image', 'video']
+//         ]}})
+
+
+// export default Quill;
+// import Summernote from 'summernote'
 // import Vue from 'vue'
 // import PostsList from '../components/PostsList.vue'
 // import NewPost from '../components/NewPost.vue'
+
+// import Quill from 'quill/core';
+//
+// import Toolbar from 'quill/modules/toolbar';
+// import Snow from 'quill/themes/snow';
+//
+// import Bold from 'quill/formats/bold';
+// import Italic from 'quill/formats/italic';
+// import Header from 'quill/formats/header';
+
+
+
+
 import App from '../app.vue'
 
 Vue.use(VueRouter)

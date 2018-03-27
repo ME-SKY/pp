@@ -1,7 +1,7 @@
 <template>
     <div id="mooo">
         <div id="editor-ya" class="edityab"></div>
-        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jodit/3.1.39/jodit.min.css">
+        <!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jodit/3.1.39/jodit.min.css">-->
         <!--<script src="//cdnjs.cloudflare.com/ajax/libs/jodit/3.1.39/jodit.min.js"></script>-->
         <textarea id="jeditor" name="editor"></textarea>
     </div>
@@ -68,7 +68,7 @@
 //     Icons['dropdown'] = faDropdown;
 
      import Jodit from 'jodit';
-     import 'jodit/build/jodit.min.css';
+//     import 'jodit/build/jodit.min.css';
 
 
 //    Quill.register({
@@ -92,7 +92,10 @@
     export default {
         mounted: function () {
             console.log('piska')
-            var editor = new Jodit('#jeditor');
+            var editor = new Jodit('#jeditor',{
+                maxWidth: 500,
+                maxHeight: 320
+            });
 //            var editor = new Jodit("#jeditor", {
 //                "allowResizeY": false,
 //                "height": 150,
@@ -138,5 +141,6 @@
 </script>
 
 <style>
+    @import '../../../node_modules/jodit/build/jodit.min.css';
 
 </style>

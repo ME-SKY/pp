@@ -93,9 +93,31 @@
         mounted: function () {
             console.log('piska')
             var editor = new Jodit('#jeditor',{
+                enableDragAndDropFileToEditor: true,
+                extraButtons: ["upload"],
                 maxWidth: 500,
-                maxHeight: 320
+                maxHeight: 320,
+                uploader: {
+                    url: '/attachments/',
+                    format: 'json',
+                    filesVariableName: 'images',
+                    headers: {
+                        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    process: function (resp) {
+                        console.log(resp.body)
+
+                    },
+                    defaultHandlerError: function(data, resp) {
+                        console.log("data: " + data)
+                        if (resp != undefined)
+                            console.log("resp: " + resp)
+                    }
+                }
+//
             });
+
+//            editor.uploader.bind($('#uploaderbox'));
 //            var editor = new Jodit("#jeditor", {
 //                "allowResizeY": false,
 //                "height": 150,

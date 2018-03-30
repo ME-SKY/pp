@@ -100,19 +100,84 @@
                 uploader: {
                     url: '/attachments/',
                     format: 'json',
+//                    queryBuild: function (data) {
+//                        console.log(data)
+//                        return JSON.stringify(data);
+//                    },
+
                     filesVariableName: 'images',
                     headers: {
                         'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     },
+                    isSuccess: function(resp){
+                        console.log("resp: " + JSON.stringify(resp))
+                        return !resp.error;
+                    },
+                    getMessage: function() {
+                        console.log('message!')
+                    },
                     process: function (resp) {
-                        console.log(resp.body)
-
+                        console.log(resp.file.url)
+                        return {
+                            baseurl: resp.file.url
+                        }
+//                       resp.baseurl = '/jat/files/'
+//                        return resp;
+                    },
+                    defaultHandlerSuccess: function (data, resp) {
+                        console.log('defaultHandlerSuccess is running')
+//                        var i, field = 'files';
+//                        if (data[field] && data[field].length) {
+//                            for (i = 0; i < data[field].length; i += 1) {
+                                console.log('bolabola ')
+                                console.log("data: " + data)
+                                this.selection.insertImage(data.baseurl );
+//                            }
+//                        }
                     },
                     defaultHandlerError: function(data, resp) {
-                        console.log("data: " + data)
+                        console.log("data in errorHandler: " + JSON.stringify(data))
                         if (resp != undefined)
                             console.log("resp: " + resp)
                     }
+//                    queryBuild: function (data) {
+//                        console.log("data in queryBuild: " + JSON.stringify(data))
+//                        return JSON.stringify(data);
+//                    },
+//                    contentType: function () {
+//                        return 'application/json';
+//                    }
+//                    buildData: function (data) {
+//                         console.log("data in buildData: " + JSON.stringify(data))
+//                         return new Promise(function (resolve, reject) {
+//                             var reader = new FileReader();
+//                             reader.readAsDataURL(data.getAll('files[0]')[0]);
+//                             reader.onload = function  () {
+//                                 return resolve({
+//                                     image: reader.result
+//                                 });
+//                             };
+//                             reader.onerror =  function  (error) {
+//                                 reject(error);
+//                             }
+//                         });
+//                     }
+//                    buildData: function (data) {
+//                        return new Promise(function (resolve, reject) {
+//                            var reader = new FileReader();
+//                            reader.readAsDataURL(data.getAll('files[0]')[0]);
+//                            reader.onload = function  () {
+//                                return resolve({
+//                                    image: reader.result
+//                                });
+//                            };
+//                            reader.onerror =  function  (error) {
+//                                reject(error);
+//                            }
+//                        })}
+//                    contentType: function () {
+//                        return 'image/png';
+//                    }
                 }
 //
             });

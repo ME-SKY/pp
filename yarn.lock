@@ -1938,6 +1938,10 @@ domain-browser@^1.1.1:
   version "1.1.7"
   resolved "https://registry.yarnpkg.com/domain-browser/-/domain-browser-1.1.7.tgz#867aa4b093faa05f1de08c06f4d7b21fdf8698bc"
 
+dropzone@^5.4.0:
+  version "5.4.0"
+  resolved "https://registry.yarnpkg.com/dropzone/-/dropzone-5.4.0.tgz#3290c07f59b189eb5a11e99a58c9b2adae5acfec"
+
 duplexer3@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/duplexer3/-/duplexer3-0.1.4.tgz#ee01dd1cac0ed3cbc7fdbea37dc0a8f1ce002ce2"
@@ -6586,6 +6590,12 @@ vue-trumbowyg@^3.2.0:
   resolved "https://registry.yarnpkg.com/vue-trumbowyg/-/vue-trumbowyg-3.2.0.tgz#93ba70c626a27a9f29227640ef2ad7caa99fc329"
   dependencies:
     trumbowyg "^2.9.4"
+
+vue2-dropzone@^3.0.6:
+  version "3.0.6"
+  resolved "https://registry.yarnpkg.com/vue2-dropzone/-/vue2-dropzone-3.0.6.tgz#3712308e61f9aa527489e0330cd0687c0ae4f7e0"
+  dependencies:
+    dropzone "^5.4.0"
 
 vue2-editor@^2.4.2:
   version "2.4.2"

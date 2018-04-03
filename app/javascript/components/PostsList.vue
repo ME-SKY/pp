@@ -2,6 +2,8 @@
     <div class="postslistclass">
         <!--<quill-editor/>-->
         <editor-aga/>
+        <editor-ck/>
+        <rich-editor/>
         <div v-for="post in all_posts" class="one_post">
             <one-post-comp :image_post_url="post_header_image_url(post)"
                            :theme="post.theme"
@@ -18,6 +20,8 @@
 //  import 'trumbowyg/dist/ui/trumbowyg.css'
   import OnePost from './one_post'
   import EditorAga from './editor_aga'
+import EditorCk from './editor_ck'
+import RichTextEditor from './rich_text_editor'
 //import { quillEditor } from 'vue-quill-editor'
 //import 'quill/dist/quill.core.css'
 //import themeShow from  'quill/dist/quill.snow.css'
@@ -37,7 +41,9 @@
 export default {
   components: {
     'one-post-comp': OnePost,
-    'editor-aga': EditorAga
+    'editor-aga': EditorAga,
+    'editor-ck': EditorCk,
+      'rich-editor': RichTextEditor
 //    'quill-editor-vue': quillEditor({'themes/show': Show})
   },
   data: function(){

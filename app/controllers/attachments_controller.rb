@@ -1,4 +1,5 @@
 class AttachmentsController < ApplicationController
+  skip_before_action :verify_authenticity_token
   # respond_to :json
 
   def index
@@ -9,9 +10,11 @@ class AttachmentsController < ApplicationController
   end
 
   def create
-    # p "params: #{ params }"
-    @attachment = Attachment.create(file: params[:files]['0'])
-    render json: @attachment
+    @attachment = Attachment.create(file: params['upload'])
+    # url = @attachment.file
+    # attachment_json = {uploaded: true, @attachment}.to_json
+    atjson = {uploaded: true, url:  @attachment.file.url}.to_json
+    render json: atjson
     # respond_to do |format|
     #   if @attachment.save
     #     redirect_to action: :show

@@ -15,6 +15,7 @@
     "ckeditor": "^4.9.1",
     "coffeescript": "1.12.7",
     "html-loader": "^0.5.5",
+    "html2json": "^1.0.2",
     "jodit": "^3.1.77",
     "jquery": "^3.3.1",
     "node-sass": "^4.7.2",

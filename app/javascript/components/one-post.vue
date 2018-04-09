@@ -7,8 +7,7 @@
             </header>
             <section class="post">
                 <div class="post-content">
-                    <h3 class="title">{{ theme }}</h3>
-                    <p class="border post_text"> {{ description }}</p>
+                    <div id="htmled" v-html="content"></div>
                 </div>
             </section>
             <section class="additional-post-info"></section>
@@ -19,7 +18,12 @@
 
 <script>
     export default {
-        props: ["image_post_url", "theme", "description"]
+        props: ["content","image_post_url", "theme", "description", "post"]
+//        computed: {
+//            htmledPostContent: function(){
+//                return this.content
+//            }
+//        }
     }
 </script>
 

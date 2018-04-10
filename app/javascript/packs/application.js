@@ -35,6 +35,7 @@ Vue.component('font-awesome-icon', FontAwesomeIcon)
 // })
 
 // const el = document.body.appendChild(document.createElement('application'))
+
 new Vue({
     // router,
     ...App
@@ -44,4 +45,3 @@ new Vue({
     // template: '<app/>',
     // components: { App }
 }).$mount('#app')
-

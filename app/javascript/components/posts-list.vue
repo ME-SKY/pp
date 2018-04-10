@@ -4,9 +4,7 @@
         <!--<rich-editor/>-->
 
         <div v-for="post in all_posts" class="one_post">
-            <one-post :content="post.text" :image_post_url="post_header_image_url(post)"
-                           :theme="post.theme"
-                           :description="post.description" :post="post"/>
+            <one-post :content="post.text" />
         </div>
     </div>
 </template>
@@ -14,12 +12,10 @@
 <script>
 
   import OnePost from './one-post'
-//  import RichTextEditor from './rich-text-editor'
 
   export default {
         components: {
           'one-post': OnePost
-//          'rich-editor': RichTextEditor
         },
         data: function(){
           return {
@@ -37,10 +33,22 @@
                 }, function(error){
                     console.log('error')
                 })
+            },
+            add_new_post: function(post){
+               this.all_posts.push(post)
             }
         },
         created: function() {
             this.get_posts()
+        },
+        mounted: function(){
+            var vc = this
+            vc.$root.$on('newPostIsCreated', function (post) {
+              console.log('new post is created!!!')
+              console.log(post)
+              console.log(vc.all_posts)
+              vc.all_posts.unshift(post)
+            })
         }
   }
 

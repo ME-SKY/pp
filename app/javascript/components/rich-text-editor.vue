@@ -8,9 +8,9 @@
         <form action="/attachments/" method="post" contenteditable="false" enctype="multipart/form-data" name="attachment">
             <input @change="imgUploadAndInsert"  type="file" name="file" accept="image/*"  hidden/>
         </form>
-        <iframe name="richEditor" id="richEditor" class="rich_editor">
+        <iframe name="richEditor" id="richEditor" class="rich_editor" contenteditable="true">
 
-        </iframe>
+        </iframe >
         <div class="saveAndPublic">
             <div class="saveContentAsPost" @click="saveAsPost">
                  <font-awesome-icon :icon="saveContent"></font-awesome-icon>
@@ -20,14 +20,10 @@
 </template>
 
 <script>
-//    import FontAwesomeIcon from '@fortawesome/vue-fontawesome'
     import faImage from '@fortawesome/fontawesome-free-solid/faImage'
     import faSave from '@fortawesome/fontawesome-free-solid/faSave'
 
     export default {
-//        components: {
-//            FontAwesomeIcon
-//        },
         computed: {
             iconImage () {
                 return faImage
@@ -37,6 +33,8 @@
             }
         },
         mounted: function(){
+            richEditor.document.open();
+            richEditor.document.close();
             richEditor.document.designMode = 'on'
         },
         methods: {
@@ -45,12 +43,20 @@
                 var formData = new FormData()
                 var xhr = new XMLHttpRequest()
                 var token = document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                var vc = this
 
                 xhr.open("POST", "/posts/")
                 xhr.setRequestHeader('X-CSRF-Token', token)
 
                 formData.append("content", content)
                 xhr.send(formData)
+                xhr.onreadystatechange = function(){
+                    if (xhr.readyState == 4) {
+                        var respText = JSON.parse(xhr.responseText)
+                        // var postId = respText.id
+                        vc.$root.$emit('newPostIsCreated', respText)
+                    }
+                }
             },
             clickInputField: function() {
                 document.querySelector('input[name="file"]').click()

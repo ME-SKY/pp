@@ -12,16 +12,17 @@ class PostsController < ApplicationController
 
   def create
     @post = Post.create(text: params[:content])
-    respond_to do |format|
-      if @post.save
-        # Attachment.create(file: params[:post][:attachment], post_id: @post.id)
-        format.html { redirect_to action: :index}
-        format.json { render :show, status: :created, location: @post }
-      else
-        format.html { render :new }
-        format.json { render json: @post.errors, status: :unprocessable_entity }
-      end
-    end
+    render json: @post
+    # respond_to do |format|
+    #   if @post.save
+    #     # Attachment.create(file: params[:post][:attachment], post_id: @post.id)
+    #     format.html { redirect_to action: :index}
+    #     format.json { render :show, status: :created, location: @post }
+    #   else
+    #     format.html { render :new }
+    #     format.json { render json: @post.errors, status: :unprocessable_entity }
+    #   end
+    # end
   end
 
   def show

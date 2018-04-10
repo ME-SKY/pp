@@ -3,7 +3,7 @@
         <div class="post-wrapper">
             <header class="post-header">
                 <h3 class="hmg"></h3>
-                <img :src= "image_post_url" >
+                <!-- <img :src= "image_post_url" > -->
             </header>
             <section class="post">
                 <div class="post-content">
@@ -18,7 +18,7 @@
 
 <script>
     export default {
-        props: ["content","image_post_url", "theme", "description", "post"]
+        props: ["content"]
 //        computed: {
 //            htmledPostContent: function(){
 //                return this.content

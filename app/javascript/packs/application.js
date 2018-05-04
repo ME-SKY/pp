@@ -6,11 +6,15 @@
 //
 // To reference this file, add <%= javascript_pack_tag 'application' %> to the appropriate
 // layout file, like app/views/layouts/application.html.erb
+
 import Vue from 'vue/dist/vue.esm'
 import FontAwesomeIcon from '@fortawesome/vue-fontawesome'
 
 import VueRouter from 'vue-router'
 import VueResource from 'vue-resource'
+import VueDraggableResizable from 'vue-draggable-resizable'
+
+
 
 
 
@@ -21,6 +25,7 @@ Vue.use(VueRouter)
 Vue.use(VueResource)
 
 Vue.component('font-awesome-icon', FontAwesomeIcon)
+Vue.component('vue-draggable-resizable', VueDraggableResizable)
 // Vue.use(FontAwesomeIcon)
 // Vue.use(Trumbo)
 // Vue.use(VueMaterial)

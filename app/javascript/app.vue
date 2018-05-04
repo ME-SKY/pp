@@ -55,8 +55,8 @@
     }
 
     #editor-box{
-        margin-left: 35%;
-        margin-right: auto;
+        /*margin-left: 35%;*/
+        /*margin-right: auto;*/
     }
 
     #hidden-empty-tag{

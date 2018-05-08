@@ -40,9 +40,9 @@
             <input @change="imgUploadAndInsert" type="file" name="file" accept="image/*"  hidden/>
         </form>
 
-        <div id="richED"  @mouseup="seeStyleOnTools" v-on:keydown="changePSpan" @keydown.delete="checkCharCount" contenteditable="true" @mouseover="mouseOnEditor" @mouseout="mouseOffEditor" @click="makeAreaActive"  @keyup.delete="CEDtrue">
+        <div id="richED"  @mouseup="seeStyleOnTools" @keydown.enter="addBR" @keydown.delete="checkCharCount" contenteditable="true" @mouseover="mouseOnEditor" @mouseout="mouseOffEditor" @click="makeAreaActive"  @keyup.delete="CEDtrue" @keypress="bum" @keydown="richParamChange" @keyup="richParamChange">
 
-            <p class="writer"  ></p>
+            <p class="writer"></p>
             <!--<span id="placeholder2" contenteditable="false">placeholder2</span>-->
             <!--<div class="heightone" contenteditable="true" @mouseover="mouseOnEditor" @mouseout="mouseOffEditor" @click="makeAreaActive">-->
                 <!--<p id="wr0" class="writer"  @keyup.enter="createNewWriter">-->
@@ -94,6 +94,7 @@
               mouse_on_editor: false,
               hidePlaceholderSpan: false,
               rich_text: '',
+              rich_text_count: 0,
               width: 0,
               height: 0,
               x: 10,
@@ -179,36 +180,147 @@
           // richEditor.focus()
         },
         methods: {
+            richParamChange: function(e){
+                console.log('richParamChange: hasChildNodes is: '+ document.querySelector('#richED').hasChildNodes())
+                if(document.querySelector('#richED').hasChildNodes()){
+                    var presumablyEditableP = document.querySelector('#richED').lastChild
+                    if(document.querySelector('#richED').lastChild.nodeType === Node.TEXT_NODE){
+                        console.log('OOOPS!')
+                    }else{
+                        presumablyEditableP = document.querySelector('#richED').lastChild
+                        if(presumablyEditableP){ this.rich_text_count = presumablyEditableP.innerText.length }
+                        console.log('rich_text_count = ' + this.rich_text_count)
 
+                    }
+                    // var editableP = document.querySelector('#richED').lastChild
+                    // if(editableP){ this.rich_text_count = editableP.innerText.length }
+                    // console.log('rich_text_count = ' + this.rich_text_count)
+                }
+            },
+            bum: function(){
+                console.log('BBBBBBBBBBB UUUUUUUUU MMMMMM!!!!!!!!!!!!!')
+            },
+            addBR: function(e){
+                if(e.target.children > 1){
+                    var editableP = document.querySelector('#richED').firstChild
+                    console.log('add BR')
+                    if(editableP.innerText.length === 0){
+                        console.log('editableP.innerText.length is 0')
+                        // editableP.contentEditable = false
+                        // var brTag = document.createElement('br')
+                        // editableP.appendChild(brTag)
+                    }
+                }
 
-            deleteBr: function(){
+            },
+            deleteBR: function(targetP){
                 console.log('delete br')
 
             },
-            checkCharCount: function(){
+            checkCharCount: function(e){
                 console.log('check char count')
-                var editableP = document.querySelector('#richED').firstChild
+                console.log('#richED children length is: ' + e.target.children.length)
+                if(document.querySelector('#richED').children.length <= 1){
 
-                if(editableP.innerText.length <= 1){
-                    console.log('YES length is 1 or less')
-                    if(editableP.hasChildNodes()){
-                        console.log('YES it has Child Nodes!')
-                        // editableP.style.pointerEvents = 'none';
-                        editableP.contentEditable = 'false';
+                    var editableP = document.querySelector('#richED').lastChild
+                    if(editableP){
+                        if(editableP.isContentEditable){ console.log('checkCharCount: P is ContentEditable') }
+                        if(!editableP){
+                            console.log('editableP undefined: ')
+                            // e.stopPropagation()
+                        }
+                        if(editableP.innerText.length === 1){
+                            console.log(`!editableP.innerText  ALMOST empty!: innerText.length = ${editableP.innerText.length}, rich_text_count: ${this.rich_text_count}`)
+                            // editableP.contentEditable = false
+
+                        }
+                        if(editableP.lastChild){
+                            if(editableP.lastChild.nodeValue == null){
+                                console.log(`RICH_TEXT_COUNT: ${ this.rich_text_count }, INNER_TEXT_COUNT: ${ editableP.innerText.length }`)
+                                e.preventDefault()
+                            }
+                        }else{
+                            e.preventDefault()
+                        }
+
+
+                        var bb = editableP.innerText == undefined
+                        // editableP.contentEditable = false
+                        console.log('text is: ' + editableP.innerText + ' and length is: '+ editableP.innerText.length + ' editableP.innerText is undefined?: ' + bb)
                     }
+                    // if(editableP.isContentEditable){ console.log('checkCharCount: P is ContentEditable') }
+                    // if(!editableP){
+                    //     console.log('editableP undefined: ')
+                        // e.stopPropagation()
+                    // }
+                    // if(editableP.innerText.length === 1){
+                    //     console.log('!editableP.innerText empty!')
+                    //     editableP.contentEditable = false
+                    //
+                    // }
+
+
+
+                    // editableP.contentEditable = false
+                    // console.log('length is: ' + editableP.innerText)
+                    // var editableP = document.querySelector('#richED').firstChild
+                    // if(editableP.innerText === '') { alert('!editableP.innerText empty!') }
+                    // if(editableP.innerText === '' || editableP.innerText.length === 0){
+                    //     console.log('!editableP.innerText empty!')
+                        // e.preventDefault()
+                        // editableP.contentEditable = false
+
+                        // if(editableP.innerText.length === 0){
+                        //     console.log('editableP.innerText.length is: ' + editableP.innerText.length)
+                        //     editableP.contentEditable = false
+                        // }
+                        // if(editableP.innerText === ''){
+                        //     console.log('editableP.innerText.length is: ' + editableP.innerText.length)
+                        //     editableP.contentEditable = false
+                        // }
+                        // if(editableP.hasChildNodes()){
+                        //     console.log('YES it has Child Nodes!')
+                            // editableP.style.pointerEvents = 'none';
+                            // editableP.contentEditable = 'false';
+                        // }
+                        // if(editableP.innerText.length === 0){ editableP.contentEditable = false }
+                    // }
+                }else if(document.querySelector('#richED').children.length === 2) {
+                    console.log('checkCharCount: two child in #richED')
 
                 }
 
             },
             CEDtrue: function(){
+
                 console.log('CEDtrue')
-                var editableP = document.querySelector('#richED').firstChild
-                if(editableP.isContentEditable == false){
-                    editableP.contentEditable = true;
-                    if(editableP.innerText.length <= 1){
-                        editableP.innerText = ''
+                if(document.querySelector('#richED').children.length === 1){
+                    console.log('CEDtrue: one child in #richED')
+                    var editableP = document.querySelector('#richED').firstChild
+                    if(!editableP.isContentEditable){
+                        console.log('CEDtrue: contentEditable is false')
+                        editableP.contentEditable = true
+                        if(editableP.innerText.length <= 1){
+                            console.log('CEDtrue: .innerText.length less or equal 1')
+                            editableP.innerText = ''
+                        }
+                    }else {
+                        console.log('CEDtrue: p is contenteditable and...')
+                        console.log('...length is: ')
+                        if(editableP.innerText.length < 1){
+                            console.log('CEDtrue: .innerText.length less or equal 1')
+                            // editableP.innerText = ''
+                        }
+                        if(editableP.firstChild != null){
+                            if(editableP.firstChild.tagName === 'BR') {
+                                console.log('CEDtrue: editableP.firstChild.tagName is BR')
+                                editableP.firstChild.remove()
+                            }
+                        }
+
                     }
                 }
+
             },
             makeAreaActive: function(){
                 console.log('makeAreaActive')
@@ -413,35 +525,66 @@
                 // var lastParentNode = document.getSelection().anchorNode.parentNode
                 // var tagnamestyle = lastParentNode.tagName.toLowerCase()
                 // var pTagQuantity = document.querySelector('#richED').children.length
-                var editableP = document.querySelector('#richED').firstChild
-                // if(pTagQuantity <= 1){
+                var editableP = null
+                // var editableP = document.querySelector('#richED').firstChild
+
+                if(document.querySelector('#richED').hasChildNodes()){
+                    editableP = document.querySelector('#richED').firstChild
+
                     if(!editableP.hasChildNodes()){
                         // var editableP = document.querySelector('#richED').firstChild
                         if(editableP.innerText.length <= 1){
 
                         }
                     }
+
+                    var all_nodes_names = this.returnNotDivLastParentNodesNames(document.getSelection().anchorNode)
+
+                    if(all_nodes_names.length == 0){
+                        for(var prop in this.buttons_activity) {
+                            this.buttons_activity[prop] = false
+                        }
+                    }else{
+                        for (let tagname of tag_names){
+                            if (all_nodes_names.includes(tagname)){
+                                this.buttons_activity[`${tagname}_active`] = true
+                            }else{
+                                this.buttons_activity[`${tagname}_active`] = false
+                            }
+                        }
+
+
+                    }
+
+                }
+                // if(pTagQuantity <= 1){
+                //     if(!editableP.hasChildNodes()){
+                        var editableP = document.querySelector('#richED').firstChild
+                        // if(editableP.innerText.length <= 1){
+                        //
+                        // }
+                    // }
                 // }
-                var all_nodes_names = this.returnNotDivLastParentNodesNames(document.getSelection().anchorNode)
+                // var all_nodes_names = this.returnNotDivLastParentNodesNames(document.getSelection().anchorNode)
 
                 // this.checkStyle()
                 // console.log('checked!!! and style or parantnode tag is: ' + tagnamestyle)
 
-                if(all_nodes_names.length == 0){
-                    for(var prop in this.buttons_activity) {
-                        this.buttons_activity[prop] = false
-                    }
-                }else{
-                    for (let tagname of tag_names){
-                        if (all_nodes_names.includes(tagname)){
-                            this.buttons_activity[`${tagname}_active`] = true
-                        }else{
-                            this.buttons_activity[`${tagname}_active`] = false
-                        }
-                    }
-
-
-                }
+                // if(all_nodes_names.length == 0){
+                //     for(var prop in this.buttons_activity) {
+                //         this.buttons_activity[prop] = false
+                //     }
+                // }else{
+                //     for (let tagname of tag_names){
+                //         if (all_nodes_names.includes(tagname)){
+                //             this.buttons_activity[`${tagname}_active`] = true
+                //         }else{
+                //             this.buttons_activity[`${tagname}_active`] = false
+                //         }
+                //     }
+                //
+                //
+                // }
                 // if(tag_names.includes(tagnamestyle)){
                 //     this.buttons_activity[`${tagnamestyle}_active`] = true
                 // }else{
@@ -602,28 +745,29 @@
         box-shadow: 0 1px 3px rgba(0,0,0,0.12),0 1px 1px 1px rgba(0,0,0,0.16);
         background: white;
         outline: none;
-        padding: 16px;
+        padding: 0px 16px 16px;
         /*z-index: 2;*/
         font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
         & :only-child{
             margin: 0;
             padding-top: 16px;
-            padding-left: 14px;
+            /*padding-left: 14px;*/
             z-index: 2;
             /*background: red;*/
         }
 
         & :only-child:after{
-            content: 'CHLEN';
+            content: '';
             position: absolute;
         }
 
         & :only-child:empty:after{
-            content: '!!!!!!!!';
+            content: 'ТАЙПХИР!';
             position: absolute;
-            top: 60px;
-            left: -15px;
+            color: rgba(28, 28, 28, 0.45);
+            /*top: 60px;*/
+            /*<!--left: -15px;-->*/
         }
 
         /*.writer:before{*/
@@ -708,6 +852,7 @@
     }
     p {
         line-height: 1.5;
+        margin: 16px 0 0;
     }
 
     .edit-buttons-group{

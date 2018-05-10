@@ -16,7 +16,7 @@
 
 
 
-        <!--<canvas id="canvas" width=350 height=350></canvas>-->
+        <!--<canvas id="canvas_example" width=350 height=350></canvas>-->
 
         <div class="edit-buttons">
             <div class="edit-buttons-group">
@@ -43,6 +43,7 @@
         <div id="richED"  @mouseup="seeStyleOnTools" @keydown.enter="addBR" @keydown.delete="checkCharCount" contenteditable="true" @mouseover="mouseOnEditor" @mouseout="mouseOffEditor" @click="makeAreaActive"  @keyup.delete="CEDtrue" @keypress="bum" @keydown="richParamChange" @keyup="richParamChange">
 
             <p class="writer"></p>
+            <!--<canvas id="canvas_example" width=200 height=200></canvas>-->
             <!--<span id="placeholder2" contenteditable="false">placeholder2</span>-->
             <!--<div class="heightone" contenteditable="true" @mouseover="mouseOnEditor" @mouseout="mouseOffEditor" @click="makeAreaActive">-->
                 <!--<p id="wr0" class="writer"  @keyup.enter="createNewWriter">-->
@@ -81,6 +82,14 @@
     import faSave from '@fortawesome/fontawesome-free-solid/faSave'
     import faBold from '@fortawesome/fontawesome-free-solid/faBold'
     import faItalic from '@fortawesome/fontawesome-free-solid/faItalic'
+    import { fabric } from 'fabric'
+    // import { gm } from 'gm'
+    // var gm = require('gm')
+    // var im = require('imagemagick');
+    // require('jimp/browser/lib/jimp');
+    // const Jimp = window.Jimp;
+
+
 
 
 
@@ -441,15 +450,54 @@
                         var respText = JSON.parse(xhr.responseText)
                         var fileUrl = respText.file.url
                         document.execCommand('insertImage', false, fileUrl)
-                        var image = document.querySelector(`img[src="${fileUrl}"]`)
-                        console.log('width: ' + image.naturalHeight)
+                        console.log(fileUrl)
 
-                        console.log('naturaltheight:' + image.naturalWidth)
-                        // var ptag = document.createElement('p')
-                        // ptag.className = 'resizableImg'
-                        // ptag.className += 'last_r_img'
-                        document.querySelector('p.last_p').appendChild(image)
-                        // RichED.appendChild(ptag)
+                        var canvasTag = document.createElement('canvas')
+                        canvasTag.id = 'canvas_example'
+                        canvasTag.className = 'canvas_example'
+                        // canvasTag.className += 'last_r_img'
+                        // document.querySelector('p#w').appendChild(image)
+                        RichED.appendChild(canvasTag)
+
+                        var canvas = new fabric.Canvas('canvas_example');
+
+                        fabric.Image.fromURL('/uploads/attachment/file/304/c3cea700e2e67f293250fdba6d42471d.jpg', function(oImg) {
+                            // scale image down, and flip it, before adding it onto canvas
+                            oImg.scale(0.5).set('flipX', true);
+                            canvas.add(oImg);
+                        });
+                        // gm(fileUrl)
+                        //     .resize(240, 240)
+                        //     .noProfile()
+                        //     .write('uploads/attachment/file/304/resizedimage.jpg', function (err) {
+                        //         if (!err) console.log('done');
+                        //     });
+                        // var image = document.querySelector(`img[src="${fileUrl}"]`)
+                        // im.readMetadata('uploads/attachment/file/304/c3cea700e2e67f293250fdba6d42471d.jpg', function(err, metadata){
+                        //     if (err) throw err;
+                        //     console.log('Shot at '+metadata.exif.dateTimeOriginal);
+                        // })
+                        // Jimp.read(fileUrl, function (err, image) {
+                        //     if (err) throw err;
+                        //     image.resize(256, 256)            // resize
+                        //     image.write("uploads/attachments/file/304/image-so-small.jpg"); // save
+                        // })
+
+
+                        // try {
+                        //     console.log('info is: ' + info("/uploads/attachment/file/304/c3cea700e2e67f293250fdba6d42471d.jpg").size)
+                        //     console.log("I should not show");
+                        // } catch (ImageMagickMissingError) {
+                        //     console.log("I should show");
+                        // }
+                        // console.log('width: ' + image.naturalHeight)
+
+                        // console.log('naturaltheight:' + image.naturalWidth)
+                        var canvasTag = document.createElement('canvas')
+                        canvasTag.className = 'canvas_example'
+                        // canvasTag.className += 'last_r_img'
+                        // document.querySelector('p#w').appendChild(image)
+                        RichED.appendChild(canvasTag)
                         // RichED.lastChild.appendChild(image)
                         // image.className += 'resizableImg'
                         // console.log(image)
@@ -537,7 +585,7 @@
 
                         }
                     }
-
+                    console.log('anchorNode is: ' + document.getSelection().anchorNode)
                     var all_nodes_names = this.returnNotDivLastParentNodesNames(document.getSelection().anchorNode)
 
                     if(all_nodes_names.length == 0){
@@ -617,13 +665,16 @@
             },
             returnNotDivLastParentNodesNames (node) {
                 var node_names = []
-                var i = (node.tagName != undefined) ? node : node.parentNode
-                // console.log('NOT IN WHILE, i is: ' + i.tagName)
+                if(node != null){
+                    var i = (node.tagName != undefined) ? node : node.parentNode
+                    // console.log('NOT IN WHILE, i is: ' + i.tagName)
 
-                while(i.tagName != 'DIV' && i.tagName!= undefined){
-                    node_names.push(i.tagName.toLowerCase())
-                    i = i.parentNode
+                    while(i.tagName != 'DIV' && i.tagName!= undefined && i.tagName != 'CANVAS'){
+                        node_names.push(i.tagName.toLowerCase())
+                        i = i.parentNode
+                    }
                 }
+
                 return node_names
             }
 
@@ -872,6 +923,10 @@
 
     .not-a-buttons-group{
         background: white;
+    }
+
+    .canvas_example{
+        border: 1px green;
     }
 
 </style>

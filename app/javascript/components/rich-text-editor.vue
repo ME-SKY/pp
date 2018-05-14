@@ -3,11 +3,23 @@
 
         <div style="height: 1000px; width: 1000px; border: 1px solid red; position: relative;" @mousemove="saveCoordinates" id="testresize" >
             <div>
-                x {{ cursor.client.x }}, y {{cursor.client.y}}
+                x {{ cursor.position.x }}, y {{ cursor.position.y }}
             </div>
-            <vue-draggable-resizable :handles="['tr','br','bl','tl']" :w="400" :h="250"  :x="300" :y="50" v-on:resizing="onResize" :parent="true" class="resrg" :draggable="false">
 
-            </vue-draggable-resizable>
+            <p class="image_is_here" @mousedown="resize_motherfucker"></p>
+
+            <div id='test_image_resizer' class="image_resizer" :style="test_resizer_data">
+                <div class="resize_handlers top_left_handler"></div>
+                <div class="resize_handlers top_right_handler"></div>
+                <div class="resize_handlers down_left_handler"></div>
+                <div class="resize_handlers down_right_handler"></div>
+
+            </div>
+
+
+            <!--<vue-draggable-resizable :handles="['tr','br','bl','tl']" axis="x" :w="active_image.wi" :h="active_image.he"  :x="300" :y="50" v-on:resizing="onResize" :parent="true" class="resrg" :draggable="false">-->
+
+            <!--</vue-draggable-resizable>-->
 
         </div>
 
@@ -83,11 +95,27 @@
     import faBold from '@fortawesome/fontawesome-free-solid/faBold'
     import faItalic from '@fortawesome/fontawesome-free-solid/faItalic'
     import { fabric } from 'fabric'
+
+    // const sharp = require('sharp');
     // import { gm } from 'gm'
     // var gm = require('gm')
     // var im = require('imagemagick');
     // require('jimp/browser/lib/jimp');
     // const Jimp = window.Jimp;
+
+    // var observer = new MutationObserver(function(mutations) {
+    //     mutations.forEach(function(mutation) {
+    //         console.log('observer works!')
+    //         console.dir(mutation); //объект с изменениями
+    //     });
+    // });
+    //
+    // observer.observe(
+    //     document.getElementById('richED'),
+    //     {
+    //         childList: true
+    //     }
+    // );
 
 
 
@@ -100,16 +128,29 @@
     export default {
         data: function(){
           return {
+              active_image: {
+                  url: '',
+                  wi: 30,
+                  he: 30,
+                  changed_width: 0,
+                  changed_height: 0
+              },
               mouse_on_editor: false,
               hidePlaceholderSpan: false,
               rich_text: '',
               rich_text_count: 0,
               width: 0,
               height: 0,
-              x: 10,
-              y: 10,
+              test_resizer_data: {
+                  width: '300px',
+                  height: '300px',
+                  top: '500px',
+                  left: '400px'
+              },
+             // x: 10,
+             //  y: 10,
               cursor:{
-                  client: { x: 0, y: 0 }
+                  position: { x: 0, y: 0 }
               },
               buttons_activity: {
                   b_active: false,
@@ -148,6 +189,36 @@
         },
         mounted: function(){
             document.execCommand("defaultParagraphSeparator", false, "p")
+            var vc = this
+
+            var observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+
+
+                    console.log('observer works!')
+                    console.dir(mutation); //объект с изменениями
+                    if(mutation.addedNodes['0'] != undefined){
+                        if(mutation.addedNodes['0'].nodeName != undefined){
+                            console.log(`NODE_NAME is : ${mutation.addedNodes['0'].nodeName}`)
+                            if(mutation.addedNodes['0'].nodeName == 'IMG'){
+                                mutation.addedNodes['0'].onload = vc.setImageAreaProps
+
+                                // vc.showCoordinates(mutation.addedNodes['0'])
+                            }
+                        }
+
+
+                    }
+                });
+            });
+
+            observer.observe(
+                document.getElementById('richED'),
+                {
+                    childList: true,
+                    subtree: true
+                }
+            );
 
             // var observer = new MutationObserver(function(mutations) {
             //     mutations.forEach(function(mutation) {
@@ -381,7 +452,7 @@
                 if(e.target.innerText == 'оу это кажется текст?! а?? мм????'){ e.target.innerHTML = '&#8203;Пишите сюда' }
             },
             invisiblePPH: function(e){
-                https://bitcoin.org/en/you-need-to-knowconsole.log('invisiblePPH')
+                // https://bitcoin.org/en/you-need-to-knowconsole.log('invisiblePPH')
                 e.target.style.display = 'none'
             },
             visiblePPH: function(e){
@@ -392,15 +463,13 @@
             },
             saveCoordinates: function(e){
                 var testResizeDiv = document.getElementById('testresize');
-                this.cursor.client.x = e.clientX - testResizeDiv.offsetLeft
-                this.cursor.client.y = e.clientY - testResizeDiv.offsetTop
+                this.cursor.position.x = e.clientX - testResizeDiv.offsetLeft
+                this.cursor.position.y = e.clientY - testResizeDiv.offsetTop
                 // return("x = " + e.clientX + ", y = " + e.clientY)
             },
             onResize: function (x, y, width, height) {
-                this.x = x
-                this.y = y
-                this.width = width/height
-                this.height = height/width
+                console.log(`uh it resized x: ${x}, y: ${y}, width: ${width}, height: ${height}`)
+
             },
             onDrag: function (x, y) {
                 this.x = x
@@ -452,27 +521,64 @@
                         document.execCommand('insertImage', false, fileUrl)
                         console.log(fileUrl)
 
-                        var canvasTag = document.createElement('canvas')
-                        canvasTag.id = 'canvas_example'
-                        canvasTag.className = 'canvas_example'
+                        // sharp('/uploads/attachment/file/304/c3cea700e2e67f293250fdba6d42471d.jpg').rotate().resize(200)
+
+                        // var canvasTag = document.createElement('canvas')
+                        // canvasTag.id = 'canvas_example'
+                        // canvasTag.className = 'canvas_example'
                         // canvasTag.className += 'last_r_img'
                         // document.querySelector('p#w').appendChild(image)
-                        RichED.appendChild(canvasTag)
+                        // RichED.appendChild(canvasTag)
 
-                        var canvas = new fabric.Canvas('canvas_example');
+                        // var canvas = new fabric.Canvas('canvas_example');
 
-                        fabric.Image.fromURL('/uploads/attachment/file/304/c3cea700e2e67f293250fdba6d42471d.jpg', function(oImg) {
+                        // fabric.Image.fromURL('/uploads/attachment/file/304/c3cea700e2e67f293250fdba6d42471d.jpg', function(oImg) {
                             // scale image down, and flip it, before adding it onto canvas
-                            oImg.scale(0.5).set('flipX', true);
-                            canvas.add(oImg);
-                        });
+                            // oImg.scale(0.5).set('flipX', true);
+                            // canvas.add(oImg);
+                        // });
                         // gm(fileUrl)
                         //     .resize(240, 240)
                         //     .noProfile()
                         //     .write('uploads/attachment/file/304/resizedimage.jpg', function (err) {
-                        //         if (!err) console.log('done');
+                        //         if
+                        // (!err) console.log('done');
                         //     });
-                        // var image = document.querySelector(`img[src="${fileUrl}"]`)
+                        // var image = new Image('/uploads/attachment/file/304/c3cea700e2e67f293250fdba6d42471d.jpg')
+                        var image = document.querySelector(`img[src='${fileUrl}']`)
+                        image.className = 'active_img'
+                        var resizableImg = image.cloneNode(true)
+                        resizableImg.className += ' res_img'
+                        // resizableImg.style.draggable = false
+                        resizableImg.draggable = false
+                        // resizableImg
+                        resizableImg.onclick = function(e){
+                            console.log('resizable image is clicked')
+                            // resizableImg.style.width = `${e.target.width - 100}px`
+                        }
+
+                        resizableImg.onmousedown = function(e){
+
+                            console.log(` coordinates x, y: ${vc.cursor.position.x}, ${vc.cursor.position.y}`)
+                            e.target.onmousemove = function(e){
+                                console.log(` moved!!`)
+                            }
+                        }
+
+                        resizableImg.onmousemove = function(e){
+                            console.log(` moved!!`)
+                        }
+
+                        var resrg = document.querySelector('p.image_is_here')
+                        resrg.appendChild(resizableImg)
+
+                            // alert(image.width + 'x' + image.height);
+                            // console.log(`sizes: ${image}`)
+                            // this.active_image.he = image.height
+                            // this.active_image.wi = image.width
+                        // console.log(`sizes: ${image}`)
+                        // this.active_image.height = image.height
+                        // this.active_image.width = image.width
                         // im.readMetadata('uploads/attachment/file/304/c3cea700e2e67f293250fdba6d42471d.jpg', function(err, metadata){
                         //     if (err) throw err;
                         //     console.log('Shot at '+metadata.exif.dateTimeOriginal);
@@ -493,11 +599,11 @@
                         // console.log('width: ' + image.naturalHeight)
 
                         // console.log('naturaltheight:' + image.naturalWidth)
-                        var canvasTag = document.createElement('canvas')
-                        canvasTag.className = 'canvas_example'
+                        // var canvasTag = document.createElement('canvas')
+                        // canvasTag.className = 'canvas_example'
                         // canvasTag.className += 'last_r_img'
                         // document.querySelector('p#w').appendChild(image)
-                        RichED.appendChild(canvasTag)
+                        // RichED.appendChild(canvasTag)
                         // RichED.lastChild.appendChild(image)
                         // image.className += 'resizableImg'
                         // console.log(image)
@@ -514,8 +620,8 @@
                         // ctx.drawImage(image, 10, 10); // canvas drawImage
                     }
                 }
-                var elementum = document.querySelector('p.last_r_img img')
-                console.log(elementum)
+                // var elementum = document.querySelector('p.last_r_img img')
+                // console.log(elementum)
                 // var image = document.querySelector(`img[src="${fileUrl}"]`)
                 // console.log('width: ' + image.naturalHeight)
                 // console.log('naturaltheight:' + image.naturalWidth)
@@ -676,6 +782,17 @@
                 }
 
                 return node_names
+            },
+            setImageAreaProps: function(e){
+                console.log('TARGET WIDTH ' + e.target.naturalWidth + 'TARGET HEIGHT ' + e.target.naturalHeight)
+                this.active_image.he = e.target.height
+                this.active_image.wi = e.target.width
+                var act_img = document.querySelector('p.image_is_here')
+                act_img.style.width = `${e.target.width}px`
+                act_img.style.height = `${e.target.height}px`
+            },
+            resize_motherfucker: function(e){
+
             }
 
         }
@@ -684,6 +801,72 @@
 
 
 <style lang="scss" scoped>
+
+    .resize_handlers{
+        width: 10px;
+        height: 10px;
+        display: block;
+        position: absolute;
+        background: #1e88e5;
+        border: solid 1px #ffffff;
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+
+        /*.top_left_handler{*/
+            /*width: 10px;*/
+            /*height: 10px;*/
+        /*}*/
+        /*.top_right_handler{*/
+            /*width: 10px;*/
+            /*height: 10px;*/
+        /*}*/
+        /*.down_left_handler{*/
+            /*width: 10px;*/
+            /*height: 10px;*/
+        /*}*/
+        /*.down_right_handler{*/
+            /*width: 10px;*/
+            /*height: 10px;*/
+        /*}*/
+    }
+
+    .top_left_handler{
+        width: 10px;
+        height: 10px;
+
+    }
+    .top_right_handler{
+        width: 10px;
+        height: 10px;
+        top: 2px;
+        right: 2px;
+    }
+    .down_left_handler{
+        width: 10px;
+        height: 10px;
+        bottom: 2px;
+        left: 2px;
+    }
+    .down_right_handler{
+        width: 10px;
+        height: 10px;
+        bottom: 2px;
+        rigth: 2px;
+    }
+
+    /*.top_left_handler{*/
+        /**/
+    /*}*/
+    /*.top_right_handler{*/
+        /**/
+    /*}*/
+    /*.down_left_handler{*/
+        /**/
+    /*}*/
+    /*.down_right_handler{*/
+        /**/
+    /*}*/
 
     #placeholder2{ // second example
         display: block;
@@ -927,6 +1110,10 @@
 
     .canvas_example{
         border: 1px green;
+    }
+
+    .res_img{
+        object-fit: contain;
     }
 
 </style>

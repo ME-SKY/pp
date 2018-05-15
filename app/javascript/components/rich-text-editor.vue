@@ -6,9 +6,11 @@
                 x {{ cursor.position.x }}, y {{ cursor.position.y }}
             </div>
 
-            <p class="image_is_here" @mousedown="resize_motherfucker"></p>
+            <p class="image_is_here" @mousedown="resize_motherfucker" style="left: 20px;"></p>
 
-            <div id='test_image_resizer' class="image_resizer" :style="test_resizer_data">
+
+
+            <div id='image_resizer' class="image_resizer" :style="test_resizer_data">
                 <div class="resize_handlers top_left_handler"></div>
                 <div class="resize_handlers top_right_handler"></div>
                 <div class="resize_handlers down_left_handler"></div>
@@ -559,6 +561,8 @@
 
                         resizableImg.onmousedown = function(e){
 
+                            vc.activateImageResizer()
+
                             console.log(` coordinates x, y: ${vc.cursor.position.x}, ${vc.cursor.position.y}`)
                             e.target.onmousemove = function(e){
                                 console.log(` moved!!`)
@@ -790,8 +794,18 @@
                 var act_img = document.querySelector('p.image_is_here')
                 act_img.style.width = `${e.target.width}px`
                 act_img.style.height = `${e.target.height}px`
+                console.log(`act_img.top: ${act_img.offsetTop}, act_img.left: ${act_img.offsetLeft}`)
+                this.test_resizer_data.top = `${act_img.offsetTop}px`
+                this.test_resizer_data.left = `${act_img.offsetLeft}px`
+                this.test_resizer_data.height = `${e.target.height - 1}px`
+                this.test_resizer_data.width = `${e.target.width - 1}px`
             },
             resize_motherfucker: function(e){
+
+            },
+            activateImageResizer: function(e){
+                document.querySelector('#image_resizer').classList.add('its_active')
+                var image = document.querySelector('p.image_is_here')
 
             }
 
@@ -802,58 +816,75 @@
 
 <style lang="scss" scoped>
 
+    .image_resizer{
+        position: absolute;
+        border: solid 1px #1e88e5;
+        display: none;
+        user-select: none;
+        box-sizing: content-box;
+
+        &.its_active{
+            display: block
+        }
+    }
+
+    .image_is_here{
+        position: absolute;
+    }
+
     .resize_handlers{
-        width: 10px;
-        height: 10px;
         display: block;
         position: absolute;
+        width: 10px;
+        height: 10px;
         background: #1e88e5;
         border: solid 1px #ffffff;
-        -webkit-box-sizing: border-box;
-        -moz-box-sizing: border-box;
         box-sizing: border-box;
 
-        /*.top_left_handler{*/
-            /*width: 10px;*/
-            /*height: 10px;*/
-        /*}*/
-        /*.top_right_handler{*/
-            /*width: 10px;*/
-            /*height: 10px;*/
-        /*}*/
-        /*.down_left_handler{*/
-            /*width: 10px;*/
-            /*height: 10px;*/
-        /*}*/
-        /*.down_right_handler{*/
-            /*width: 10px;*/
-            /*height: 10px;*/
-        /*}*/
+        &.top_left_handler{
+            top: -5px;
+            left: -5px;
+        }
+
+        &.top_right_handler{
+            top: -5px;
+            right: -5px;
+        }
+
+        &.down_left_handler{
+            bottom: -5px;
+            left: -5px;
+        }
+
+        &.down_right_handler{
+            bottom: -5px;
+            right: -5px;
+        }
     }
 
-    .top_left_handler{
-        width: 10px;
-        height: 10px;
-
-    }
-    .top_right_handler{
-        width: 10px;
-        height: 10px;
-        top: 2px;
-        right: 2px;
-    }
-    .down_left_handler{
-        width: 10px;
-        height: 10px;
-        bottom: 2px;
-        left: 2px;
-    }
-    .down_right_handler{
-        width: 10px;
-        height: 10px;
-        bottom: 2px;
-        rigth: 2px;
-    }
+    /*.top_left_handler{*/
+        /*width: 10px;*/
+        /*height: 10px;*/
+        /**/
+    /*}*/
+    /*.top_right_handler{*/
+        /*width: 10px;*/
+        /*height: 10px;*/
+        /*top: 2px;*/
+        /*right: 2px;*/
+    /*}*/
+    /*.down_left_handler{*/
+        /*width: 10px;*/
+        /*height: 10px;*/
+        /*bottom: 2px;*/
+        /*left: 2px;*/
+    /*}*/
+    /*.down_right_handler{*/
+        /*width: 10px;*/
+        /*height: 10px;*/
+        /*bottom: 2px;*/
+        /*right: 2px;*/
+    /*}*/
 
     /*.top_left_handler{*/
         /**/

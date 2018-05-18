@@ -10,10 +10,10 @@
             <p class="image_is_here" @mousedown="resize_motherfucker" style="left: 20px;"></p>
 
             <div id='image_resizer' class="image_resizer" :style="test_resizer_data">
-                <div class="resize_handlers top_left_handler" @mousedown="mouse_down_on_IRH = true"   @mousemove="resize_image"></div>
-                <div class="resize_handlers top_right_handler" @mousedown="mouse_down_on_IRH = true"   @mousemove="resize_image"></div>
-                <div class="resize_handlers down_left_handler" @mousedown="mouse_down_on_IRH = true"   @mousemove="resize_image"></div>
-                <div class="resize_handlers down_right_handler" @mousedown="mouse_down_on_IRH = true"   @mousemove="resize_image"></div>
+                <div class="resize_handlers top_left_handler" @mousedown="resize_image"   ></div>
+                <div class="resize_handlers top_right_handler" @mousedown="resize_image"  ></div>
+                <div class="resize_handlers down_left_handler" @mousedown="resize_image"   ></div>
+                <div class="resize_handlers down_right_handler" @mousedown="resize_image"   ></div>
             </div>
         </div>
 
@@ -41,7 +41,7 @@
             <input @change="imgUploadAndInsert" type="file" name="file" accept="image/*"  hidden/>
         </form>
 
-        <div id="richED"  @mouseup="seeStyleOnTools" @keydown.enter="addBR"  @keydown.delete="checkCharCount" contenteditable="true" @mouseover="mouseOnEditor" @mouseout="mouseOffEditor" @click="makeAreaActive"  @keyup.delete="CEDtrue" @keypress="bum" @keydown="richParamChange" @keyup="richParamChange">
+        <div id="richED" ref="reditor"  @mouseup="seeStyleOnTools" @keydown.enter="addBR"  @keydown.delete="prevent_p_deletion" contenteditable="true" @mouseover="mouseOnEditor" @mouseout="mouseOffEditor" @click="makeAreaActive"  @keyup.delete="before_deletion" @keydown="char_counter" @keyup="char_counter">
 
             <p class="writer"></p>
         </div>
@@ -67,13 +67,14 @@
     export default {
         data: function(){
           return {
-              active_image: {
-                  url: '',
-                  wi: 30,
-                  he: 30,
-                  changed_width: 0,
-                  changed_height: 0
-              },
+              abcdefg: 0,
+              // active_image: {
+              //     url: '',
+              //     wi: 30,
+              //     he: 30,
+              //     changed_width: 0,
+              //     changed_height: 0
+              // },
               mouse_down_on_IRH: false,
               mouse_on_editor: false,
               hidePlaceholderSpan: false,
@@ -159,34 +160,56 @@
                 }
             );
         },
+        watch: {
+            abcdefg: function(){
+                console.log('свойство было обновлено!!!')
+              
+          }  
+        },
         methods: {
-            richParamChange: function(e){
+            char_counter: function(e){
 
-                if(e.keyCode === 13){
-                    console.log('!!! ENTER is down on up !!!')
-                }
+                //new code
 
+                var reditor = this_vc.$refs.reditor
 
-                console.log('richParamChange: hasChildNodes is: '+ document.querySelector('#richED').hasChildNodes())
+                if(reditor.hasChildNodes()){
 
-                if(document.querySelector('#richED').hasChildNodes()){
-                    var presumablyEditableP = document.querySelector('#richED').lastChild
-                    if(document.querySelector('#richED').lastChild.nodeType === Node.TEXT_NODE){
-                        console.log('OOOPS!')
-                    }else{
-                        presumablyEditableP = document.querySelector('#richED').lastChild
-                        if(presumablyEditableP){ this.rich_text_count = presumablyEditableP.innerText.length }
-                        console.log('rich_text_count = ' + this.rich_text_count)
+                    var presumablyEditableP = reditor.lastChild
 
+                    if(reditor.lastChild.nodeType !== Node.TEXT_NODE){
+                        if(presumablyEditableP){
+                            this.rich_text_count = presumablyEditableP.innerText.length
+                        }
                     }
+                }
+                //
+
+                // if(e.keyCode === 13){
+                //     console.log('!!! ENTER is down on up !!!')
+                // }
+
+
+                // console.log('richParamChange: hasChildNodes is: '+ document.querySelector('#richED').hasChildNodes())
+
+                // if(document.querySelector('#richED').hasChildNodes()){
+                //     var presumablyEditableP = document.querySelector('#richED').lastChild
+                //     if(document.querySelector('#richED').lastChild.nodeType === Node.TEXT_NODE){
+                //         console.log('OOOPS!')
+                //     }else{
+                //         presumablyEditableP = document.querySelector('#richED').lastChild
+                //         if(presumablyEditableP){ this.rich_text_count = presumablyEditableP.innerText.length }
+                //         console.log('rich_text_count = ' + this.rich_text_count)
+
+                    // }
                     // var editableP = document.querySelector('#richED').lastChild
                     // if(editableP){ this.rich_text_count = editableP.innerText.length }
                     // console.log('rich_text_count = ' + this.rich_text_count)
-                }
+                // }
             },
-            bum: function(){
-                console.log('BBBBBBBBBBB UUUUUUUUU MMMMMM!!!!!!!!!!!!!')
-            },
+            // bum: function(){
+            //     console.log('BBBBBBBBBBB UUUUUUUUU MMMMMM!!!!!!!!!!!!!')
+            // },
             addBR: function(e){
                 if(e.target.children.length === 1){
                     console.log('p tag quantity is 1')
@@ -200,37 +223,55 @@
             // deleteBR: function(targetP){
             //     console.log('delete br')
             // },
-            checkCharCount: function(e){
-                console.log('check char count')
-                console.log('#richED children length is: ' + e.target.children.length)
-                if(document.querySelector('#richED').children.length <= 1){
+            prevent_p_deletion: function(e){
+//new code
+                if(this_vc.$refs.reditor.children.length <= 1){
 
-                    var editableP = document.querySelector('#richED').lastChild
+                    var editableP = this_vc.$refs.reditor.lastChild
+
                     if(editableP){
-                        if(editableP.isContentEditable){ console.log('checkCharCount: P is ContentEditable') }
-                        if(!editableP){
-                            console.log('editableP undefined: ')
-                            // e.stopPropagation()
-                        }
-                        if(editableP.innerText.length === 1){
-                            console.log(`!editableP.innerText  ALMOST empty!: innerText.length = ${editableP.innerText.length}, rich_text_count: ${this.rich_text_count}`)
-                            // editableP.contentEditable = false
-
-                        }
                         if(editableP.lastChild){
                             if(editableP.lastChild.nodeValue == null){
-                                console.log(`RICH_TEXT_COUNT: ${ this.rich_text_count }, INNER_TEXT_COUNT: ${ editableP.innerText.length }`)
                                 e.preventDefault()
                             }
                         }else{
                             e.preventDefault()
                         }
-
-
-                        var bb = editableP.innerText == undefined
-                        // editableP.contentEditable = false
-                        console.log('text is: ' + editableP.innerText + ' and length is: '+ editableP.innerText.length + ' editableP.innerText is undefined?: ' + bb)
                     }
+                }
+
+
+                // console.log('check char count')
+                // console.log('#richED children length is: ' + e.target.children.length)
+                // if(this_vc.$refs.reditor.children.length <= 1){
+
+                    // var editableP = this_vc.$refs.reditor.lastChild
+
+                    // if(editableP){
+                        // if(editableP.isContentEditable){ console.log('checkCharCount: P is ContentEditable') }
+                        // if(!editableP){
+                        //     console.log('editableP undefined: ')
+                            // e.stopPropagation()
+                        // }
+                        // if(editableP.innerText.length === 1){
+                        //     console.log(`!editableP.innerText  ALMOST empty!: innerText.length = ${editableP.innerText.length}, rich_text_count: ${this.rich_text_count}`)
+                            // editableP.contentEditable = false
+
+                        // }
+                        // if(editableP.lastChild){
+                        //     if(editableP.lastChild.nodeValue == null){
+                                // console.log(`RICH_TEXT_COUNT: ${ this.rich_text_count }, INNER_TEXT_COUNT: ${ editableP.innerText.length }`)
+                                // e.preventDefault()
+                            // }
+                        // }else{
+                        //     e.preventDefault()
+                        // }
+
+
+                        // var bb = editableP.innerText == undefined
+                        // editableP.contentEditable = false
+                        // console.log('text is: ' + editableP.innerText + ' and length is: '+ editableP.innerText.length + ' editableP.innerText is undefined?: ' + bb)
+                    // }
                     // if(editableP.isContentEditable){ console.log('checkCharCount: P is ContentEditable') }
                     // if(!editableP){
                     //     console.log('editableP undefined: ')
@@ -268,35 +309,28 @@
                         // }
                         // if(editableP.innerText.length === 0){ editableP.contentEditable = false }
                     // }
-                }else if(document.querySelector('#richED').children.length === 2) {
-                    console.log('checkCharCount: two child in #richED')
-
-                }
+                // }else if(this_vc.$refs.reditor.children.length === 2) {
+                //     console.log('checkCharCount: two child in #richED')
+                //
+                // }
 
             },
-            CEDtrue: function(){
+            before_deletion: function(){
+                if(this_vc.$refs.reditor.children.length === 1){
 
-                console.log('CEDtrue')
-                if(document.querySelector('#richED').children.length === 1){
-                    console.log('CEDtrue: one child in #richED')
-                    var editableP = document.querySelector('#richED').firstChild
+                    var editableP = this_vc.$refs.reditor.firstChild
+
                     if(!editableP.isContentEditable){
-                        console.log('CEDtrue: contentEditable is false')
+
                         editableP.contentEditable = true
+
                         if(editableP.innerText.length <= 1){
-                            console.log('CEDtrue: .innerText.length less or equal 1')
                             editableP.innerText = ''
                         }
                     }else {
-                        console.log('CEDtrue: p is contenteditable and...')
-                        console.log('...length is: ')
-                        if(editableP.innerText.length < 1){
-                            console.log('CEDtrue: .innerText.length less or equal 1')
-                            // editableP.innerText = ''
-                        }
+
                         if(editableP.firstChild != null){
                             if(editableP.firstChild.tagName === 'BR') {
-                                console.log('CEDtrue: editableP.firstChild.tagName is BR')
                                 editableP.firstChild.remove()
                             }
                         }
@@ -306,145 +340,45 @@
 
             },
             makeAreaActive: function(){
-                console.log('makeAreaActive')
-                var docArea = document.querySelector('#richED').firstChild
-                var pTagQuantity = document.querySelector('#richED').children.length
-                console.log(docArea)
-                if(this.mouse_on_editor && pTagQuantity === 1){
-                    console.log(this.mouse_on_editor)
-                    // this.$emit('focus')
+                var docArea = this_vc.$refs.reditor.firstChild
+                var p_tag_quantity = this_vc.$refs.reditor.children.length
+
+                if(this.mouse_on_editor && p_tag_quantity === 1){
                     docArea.focus()
                 }
             },
             mouseOnEditor: function(){
-                console.log('mouse on editor')
                 this.mouse_on_editor = true
             },
             mouseOffEditor: function(){
-                console.log('mouse off editor')
                 this.mouse_on_editor = false
             },
-            changePSpan: function(e){
-                console.log('changeSpan and event is ' + e)
-                // console.log(e.target)
-                this.hidePlaceholderSpan = this.charCounterChecker(e.target)
-            },
-
-            charCounterChecker: function(target){
-                // if(target.innerText.length == 1){
-                //     target.innerHTML += '&#8203;'
-                // }
-                console.log('target: ' + target)
-                // console.log(target.innerText.length)
-                return target.innerText.length > 0
-            },
-            // changePlaceholderSpanVisibility: function(vision){
-            //     this.showPlaceholderSpan = vision
-            //
-            //     vision ? (
-            //         this.showPlaceholderSpan = true
-            //     ) : (
-            //
-            //     )
-
-
-            cleanInner: function(e){
-                console.log('cleanInner')
-                console.log(e.target.innerText)
-
-                if(e.target.innerText == 'оу это кажется текст?! а?? мм????'){ e.target.innerHTML = '&#8203;Пишите сюда' }
-            },
-            invisiblePPH: function(e){
-                // https://bitcoin.org/en/you-need-to-knowconsole.log('invisiblePPH')
-                e.target.style.display = 'none'
-            },
-            visiblePPH: function(e){
-                console.log("length: " + document.querySelector('div[id="richED"]').querySelectorAll('p').length)
-                if(document.querySelector('div[id="richED"]').querySelectorAll('p').length <= 2){
-                    e.target.style.dislay = 'block'
-                }
-            },
             saveCoordinates: function(e){
-
-                // var testResizeDiv = document.getElementById('testresize');
-                this_vc.cursor.position.x = e.clientX - e.target.offsetLeft
-                this_vc.cursor.position.y = e.clientY - e.target.offsetTop
+                var testResizeDiv = document.getElementById('testresize');
+                this_vc.cursor.position.x = e.clientX - testResizeDiv.offsetLeft
+                this_vc.cursor.position.y = e.clientY - testResizeDiv.offsetTop
 
                 if(this_vc.mouse_down_on_IRH){
-                    // console.log('its process of resizing')
-                    // console.log(`coordinates is: x= ${this_vc.test_resizer_data.image.x1_lt}, y= ${this_vc.test_resizer_data.image.y1_lt}`)
-                    // this_vc.test_resizer_data.image.x1_lt = `${this_vc.cursor.position.x}px`
-                    // this_vc.test_resizer_data.image.y1_lt = `${this_vc.cursor.position.y}px`
-                    // console.log(`coordinates is: x= ${this_vc.test_resizer_data.image.x1_lt}, y= ${this_vc.test_resizer_data.image.y1_lt}`)
 
-                    // var half_of_width = parseInt(this_vc.test_resizer_data.width, 10)/2 // THIS IS BULLSHIT
+                    var resizeFromLeftSide = this_vc.test_resizer_data.handler.search('left') != -1
 
-                    // var resizer = document.querySelector('#image_resizer')  // THIS IS BULLSHIT
-                    // console.log(`this_vc.test_resizer_data.handler.search('left') === -1 : ${this_vc.test_resizer_data.handler.search('left') === -1}`)
-                    // console.log(`this_vc.test_resizer_data.handler: ${this_vc.test_resizer_data.handler}`)
-                    // console.log(`1 or 2?: ${(this_vc.test_resizer_data.handler.search('left') === -1) ? 1 : 2}`)
+                     ++this_vc.abcdefg
 
-                    var x_start = parseInt((this_vc.test_resizer_data.handler.search('left') === -1) ? this_vc.test_resizer_data.image.x2_rt : this_vc.test_resizer_data.left)
+                    var x_start = parseInt(resizeFromLeftSide ? this_vc.test_resizer_data.left : this_vc.test_resizer_data.image.x2_rt)
+                    var  x_old =  isNaN(parseInt(this_vc.test_resizer_data.image.x1_old)) ? x_start : parseInt(this_vc.test_resizer_data.image.x1_old, 10)
+                    var x_new = this_vc.cursor.position.x // это не нужно наверное
+                    var width_old = parseInt(this_vc.test_resizer_data.width) // это тоже не нужно наверное
 
-                    // console.log(`x_start: ${x_start}`)
-                    // var left_or_right = (x_start === parseInt(this_vc.test_resizer_data.left)) ? 'left' : 'right'
-
-
-                    // if()
-
-                    // <new code
-                    // var resizeFromLeftSide = this_vc.test_resizer_data.handler.search('left') != -1
-
-                    // resizeFromLeftSide ? this_vc.test_resizer_data.left : this_vc.test_resizer_data.image.x2_rt
-                    // var x_start = parseInt(resizeFromLeftSide ? this_vc.test_resizer_data.left : this_vc.test_resizer_data.image.x2_rt)
-                    // var  x_old =  parseInt(this_vc.test_resizer_data.image.x1_old ? x_start : this_vc.test_resizer_data.image.x1_old)
-                    // var x_new = this_vc.cursor.position.x // это не нужно наверное
-                    // var width_old = parseInt(this_vc.test_resizer_data.width) // это тоже не нужно наверное
-
-
-                    // this_vc.test_resizer_data.width =  resizeFromLeftSide ? `${width_old - (x_new - x_old)}px` : `${width_old + (x_new - x_old)}px`
-                    // this_vc.test_resizer_data.image.x1_old = `${x_new}px`
-                    // this_vc.test_resizer_data.image.x2_rt = `${parseInt(this_vc.test_resizer_data.left) + parseInt(this_vc.test_resizer_data.width)}px`
-
-
-                    //new code>
-
-
-
-
-
-
-                    var x_old = isNaN(parseInt(this_vc.test_resizer_data.image.x1_old)) ? x_start : parseInt(this_vc.test_resizer_data.image.x1_old, 10)
-                    var x_new = this_vc.cursor.position.x
-                    var width_old = parseInt(this_vc.test_resizer_data.width)
-                    // console.log(`x_old: ${x_old}, x_new: ${x_new}, width_old: ${width_old}`)
-                    // console.log(`x_new - x_old: ${x_new - x_old}`)
-                    // console.log(`(width_old - (x_new - x_old): ${width_old - (x_new - x_old)}`)
-                    // console.log(`results if left: ${width_old - (x_new - x_old)}`)
-                    this_vc.test_resizer_data.width =  (this_vc.test_resizer_data.handler.search('left') != -1) ? `${width_old - (x_new - x_old)}px` : `${width_old + (x_new - x_old)}px`
+                    this_vc.test_resizer_data.width =  resizeFromLeftSide ? `${width_old - (x_new - x_old)}px` : `${width_old + (x_new - x_old)}px`
                     this_vc.test_resizer_data.image.x1_old = `${x_new}px`
                     this_vc.test_resizer_data.image.x2_rt = `${parseInt(this_vc.test_resizer_data.left) + parseInt(this_vc.test_resizer_data.width)}px`
-                    // resizer.style.top = this_vc.test_resizer_data.image.y1_lt
-                    // resizer.style.left = this_vc.test_resizer_data.image.x1_lt
-                    // var handler = document.querySelector('div.top_left_handler')
-                    // handler.style.top = this_vc.test_resizer_data.image.y1_lt
-                    // handler.style.left = this_vc.test_resizer_data.image.x1_lt
-                }                // return("x = " + e.clientX + ", y = " + e.clientY)
-            },
-            onResize: function (x, y, width, height) {
-                console.log(`uh it resized x: ${x}, y: ${y}, width: ${width}, height: ${height}`)
-            },
-            onDrag: function (x, y) {
-                this.x = x
-                this.y = y
+                }
             },
             saveAsPost: function(){
-                var RichED = document.querySelector('div[id="richED"]')
-                var content = RichED.innerHTML
-                // var content = richEditor.document.body.innerHTML
+                // var RichED = document.querySelector('div[id="richED"]')
+                var content = this_vc.$refs.reditor.innerHTML
                 var formData = new FormData()
                 var xhr = new XMLHttpRequest()
-                // var token = document.querySelector('meta[name="csrf-token"]').getAttribute('content')
 
                 xhr.open("POST", "/posts/")
                 xhr.setRequestHeader('X-CSRF-Token', this.tokenCSRF())
@@ -454,7 +388,6 @@
                 xhr.onreadystatechange = function(){
                     if (xhr.readyState == 4) {
                         var respText = JSON.parse(xhr.responseText)
-                        // var postId = respText.id
                         this_vc.$root.$emit('newPostIsCreated', respText)
                     }
                 }
@@ -748,8 +681,8 @@
             },
             setImageAreaProps: function(e){
                 console.log('TARGET WIDTH ' + e.target.naturalWidth + 'TARGET HEIGHT ' + e.target.naturalHeight)
-                this_vc.active_image.he = e.target.height
-                this_vc.active_image.wi = e.target.width
+                // this_vc.active_image.he = e.target.height
+                // this_vc.active_image.wi = e.target.width
                 var act_img = document.querySelector('p.image_is_here')
                 act_img.style.width = `${e.target.width}px`
                 act_img.style.height = `${e.target.height}px`
@@ -784,24 +717,24 @@
                 // resizableImg.style.draggable = false
                 resizableImg.draggable = false
                 // resizableImg
-                resizableImg.onclick = function(e){
-                    console.log('resizable image is clicked')
+                // resizableImg.onclick = function(e){
+                //     console.log('resizable image is clicked')
                     // resizableImg.style.width = `${e.target.width - 100}px`
-                }
+                // }
 
                 resizableImg.onmousedown = function(e){
 
                     this_vc.setImageAreaProps(e)
                     this_vc.activateImageResizer(e)
 
-                    console.log(` coordinates x, y: ${this_vc.cursor.position.x}, ${this_vc.cursor.position.y}`)
+                    // console.log(` coordinates x, y: ${this_vc.cursor.position.x}, ${this_vc.cursor.position.y}`)
                     // e.target.onmousemove = function(e){
                     //     console.log(` moved!!`)
                     // }
                 }
 
                 resizableImg.onmousemove = function(e){
-                    console.log(` moved!!`)
+                    // console.log(` moved!!`)
                 }
 
                 var resrg = document.querySelector('p.image_is_here')
@@ -809,26 +742,29 @@
                 // this_vc.setImageAreaProps
             },
             resize_image: function(e){
-                console.log(this_vc.mouse_down_on_IRH)
-                if(this_vc.mouse_down_on_IRH){
-                    console.log(`e.target.className: ${e.target.classList}`)
-                    console.log(`e.target.className[e.target.className.length - 1]: ${e.target.classList[e.target.classList.length - 1]}`)
-                    var index = e.target.classList.length - 1
-                    console.log(`e.target.className.length - 1: ${index}`)
-                    console.log(`e.target.className[e.target.className.length - 1]: ${e.target.classList[index]}`)
-                    this_vc.test_resizer_data.handler = e.target.classList[e.target.classList.length - 1]
-                    console.log('resize_image')
-                    console.log(`this_vc.test_resizer_data.handler: ${this_vc.test_resizer_data.handler}`)
-                }
+                this_vc.mouse_down_on_IRH = true
+                this_vc.test_resizer_data.handler = e.target.classList[e.target.classList.length - 1]
+                console.log('resize_image')
+                // console.log(this_vc.mouse_down_on_IRH)
+                // if(this_vc.mouse_down_on_IRH){
+                    // console.log(`e.target.className: ${e.target.classList}`)
+                    // console.log(`e.target.className[e.target.className.length - 1]: ${e.target.classList[e.target.classList.length - 1]}`)
+                    // var index = e.target.classList.length - 1
+                    // console.log(`e.target.className.length - 1: ${index}`)
+                    // console.log(`e.target.className[e.target.className.length - 1]: ${e.target.classList[index]}`)
+                    // this_vc.test_resizer_data.handler = e.target.classList[e.target.classList.length - 1]
+                    // console.log('resize_image')
+                    // console.log(`this_vc.test_resizer_data.handler: ${this_vc.test_resizer_data.handler}`)
+                // }
             },
             stop_resize_image: function(e){
                 this_vc.mouse_down_on_IRH = false
-                console.log(this_vc.mouse_down_on_IRH)
-                if(!this_vc.mouse_down_on_IRH){
+                // console.log(this_vc.mouse_down_on_IRH)
+                // if(!this_vc.mouse_down_on_IRH){
                     console.log('stop_resize_image')
                     this_vc.test_resizer_data.image.x1_old = ''
                     this_vc.test_resizer_data.handler = ''
-                }
+                // }
             }
         }
     }

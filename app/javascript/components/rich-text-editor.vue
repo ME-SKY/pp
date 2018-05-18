@@ -1,38 +1,24 @@
 <template>
+
     <div class="editable_content">
 
-        <div style="height: 1000px; width: 1000px; border: 1px solid red; position: relative;" @mousemove="saveCoordinates" id="testresize" >
+        <div style="height: 1000px; width: 1000px; border: 1px solid red; position: relative;" @mousemove="saveCoordinates" @mouseup="stop_resize_image" id="testresize" >
             <div>
                 x {{ cursor.position.x }}, y {{ cursor.position.y }}
             </div>
 
             <p class="image_is_here" @mousedown="resize_motherfucker" style="left: 20px;"></p>
 
-
-
             <div id='image_resizer' class="image_resizer" :style="test_resizer_data">
-                <div class="resize_handlers top_left_handler"></div>
-                <div class="resize_handlers top_right_handler"></div>
-                <div class="resize_handlers down_left_handler"></div>
-                <div class="resize_handlers down_right_handler"></div>
-
+                <div class="resize_handlers top_left_handler" @mousedown="mouse_down_on_IRH = true"   @mousemove="resize_image"></div>
+                <div class="resize_handlers top_right_handler" @mousedown="mouse_down_on_IRH = true"   @mousemove="resize_image"></div>
+                <div class="resize_handlers down_left_handler" @mousedown="mouse_down_on_IRH = true"   @mousemove="resize_image"></div>
+                <div class="resize_handlers down_right_handler" @mousedown="mouse_down_on_IRH = true"   @mousemove="resize_image"></div>
             </div>
-
-
-            <!--<vue-draggable-resizable :handles="['tr','br','bl','tl']" axis="x" :w="active_image.wi" :h="active_image.he"  :x="300" :y="50" v-on:resizing="onResize" :parent="true" class="resrg" :draggable="false">-->
-
-            <!--</vue-draggable-resizable>-->
-
         </div>
 
-        <!--<div id="drdr" v-draggable style="height: 120px; width: 120px; background-color: red"></div>-->
-        <!--<p id="drdr" v-draggable style="height: 120px; width: 120px; background-color: red" ></p>-->
-
-
-
-        <!--<canvas id="canvas_example" width=350 height=350></canvas>-->
-
         <div class="edit-buttons">
+
             <div class="edit-buttons-group">
                 <button class="edit-button" @click="execCmd('bold')" :class="{ style_active: buttons_activity.b_active}">
                     <font-awesome-icon :icon="iconBold" class="iconBox"></font-awesome-icon>
@@ -46,6 +32,7 @@
                     <font-awesome-icon :icon="iconImage" class="iconBox"></font-awesome-icon>
                 </button>
             </div>
+
             <div class="not-a-buttons-group">
             </div>
         </div>
@@ -54,78 +41,28 @@
             <input @change="imgUploadAndInsert" type="file" name="file" accept="image/*"  hidden/>
         </form>
 
-        <div id="richED"  @mouseup="seeStyleOnTools" @keydown.enter="addBR" @keydown.delete="checkCharCount" contenteditable="true" @mouseover="mouseOnEditor" @mouseout="mouseOffEditor" @click="makeAreaActive"  @keyup.delete="CEDtrue" @keypress="bum" @keydown="richParamChange" @keyup="richParamChange">
+        <div id="richED"  @mouseup="seeStyleOnTools" @keydown.enter="addBR"  @keydown.delete="checkCharCount" contenteditable="true" @mouseover="mouseOnEditor" @mouseout="mouseOffEditor" @click="makeAreaActive"  @keyup.delete="CEDtrue" @keypress="bum" @keydown="richParamChange" @keyup="richParamChange">
 
             <p class="writer"></p>
-            <!--<canvas id="canvas_example" width=200 height=200></canvas>-->
-            <!--<span id="placeholder2" contenteditable="false">placeholder2</span>-->
-            <!--<div class="heightone" contenteditable="true" @mouseover="mouseOnEditor" @mouseout="mouseOffEditor" @click="makeAreaActive">-->
-                <!--<p id="wr0" class="writer"  @keyup.enter="createNewWriter">-->
-                    <!--<br>-->
-                <!--</p>-->
-            <!--</div>-->
-
-            <!--<span class="placeholderSpan" contenteditable="false" :class="{ hidden_span: hidePlaceholderSpan }">тайп хир</span>-->
-
-
-            <!--<vue-draggable-resizable :handles="['tr','br','bl','tl']" :w="700" :h="700"  :x="50" :y="50" v-on:resizing="onResize" :parent="true" class="resrg" :draggable="false">-->
-
-            <!--</vue-draggable-resizable>-->
-            <!--<canvas></canvas>-->
-            <!--<p class="last_p"></p>-->
         </div>
-
-        <!--<iframe name="richEditor" id="richEditor" class="rich_editor" contenteditable="true" style="overflow-x:hidden;" >-->
-        <!--</iframe>-->
 
         <div class="saveAndPublic">
             <div class="saveContentAsPost" @click="saveAsPost">
                  <font-awesome-icon :icon="saveContent"></font-awesome-icon>
             </div>
         </div>
-
-        <!--<div id="richEditorDiv">-->
-        <!--</div>-->
     </div>
 </template>
 
 <script>
-    // import 'jquery-ui'
-    // import { Draggable } from 'draggable-vue-directive'
     import faImage from '@fortawesome/fontawesome-free-solid/faImage'
     import faSave from '@fortawesome/fontawesome-free-solid/faSave'
     import faBold from '@fortawesome/fontawesome-free-solid/faBold'
     import faItalic from '@fortawesome/fontawesome-free-solid/faItalic'
     import { fabric } from 'fabric'
 
-    // const sharp = require('sharp');
-    // import { gm } from 'gm'
-    // var gm = require('gm')
-    // var im = require('imagemagick');
-    // require('jimp/browser/lib/jimp');
-    // const Jimp = window.Jimp;
-
-    // var observer = new MutationObserver(function(mutations) {
-    //     mutations.forEach(function(mutation) {
-    //         console.log('observer works!')
-    //         console.dir(mutation); //объект с изменениями
-    //     });
-    // });
-    //
-    // observer.observe(
-    //     document.getElementById('richED'),
-    //     {
-    //         childList: true
-    //     }
-    // );
-
-
-
-
-
     var tag_names = ['b', 'i']
-    var insertedNodes = [];
-
+    var this_vc = null
 
     export default {
         data: function(){
@@ -137,6 +74,7 @@
                   changed_width: 0,
                   changed_height: 0
               },
+              mouse_down_on_IRH: false,
               mouse_on_editor: false,
               hidePlaceholderSpan: false,
               rich_text: '',
@@ -144,13 +82,23 @@
               width: 0,
               height: 0,
               test_resizer_data: {
+                  handler: '',
                   width: '300px',
                   height: '300px',
                   top: '500px',
-                  left: '400px'
+                  left: '400px',
+                  image: {
+                      x1_old: '',
+                      x1_lt: '',
+                      x2_rt: '',
+                      x3_lb: '',
+                      x4_rb: '',
+                      y1_lt: '',
+                      y2_rt: '',
+                      y3_lb: '',
+                      y4_rb: ''
+                  }
               },
-             // x: 10,
-             //  y: 10,
               cursor:{
                   position: { x: 0, y: 0 }
               },
@@ -161,9 +109,6 @@
 
           }
         },
-        // directives: {
-        //   Draggable
-        // },
         computed: {
             iconImage () {return faImage},
             iconBold () {return faBold},
@@ -184,32 +129,24 @@
                 console.log('reverseRichText')
                 return this.rich_text.split('').reverse().join('')
             }
-
-            // richED () {}
-
-
         },
         mounted: function(){
             document.execCommand("defaultParagraphSeparator", false, "p")
-            var vc = this
+            this_vc = this
 
             var observer = new MutationObserver(function(mutations) {
                 mutations.forEach(function(mutation) {
-
-
-                    console.log('observer works!')
-                    console.dir(mutation); //объект с изменениями
-                    if(mutation.addedNodes['0'] != undefined){
-                        if(mutation.addedNodes['0'].nodeName != undefined){
-                            console.log(`NODE_NAME is : ${mutation.addedNodes['0'].nodeName}`)
-                            if(mutation.addedNodes['0'].nodeName == 'IMG'){
-                                mutation.addedNodes['0'].onload = vc.setImageAreaProps
-
-                                // vc.showCoordinates(mutation.addedNodes['0'])
-                            }
+                    if(mutation.addedNodes.length > 0){
+                        console.log(mutation.addedNodes['0'])
+                        // if(mutation.addedNodes['0'] == 'img.active_img'){
+                        var imageNode =  mutation.addedNodes['0']
+                        console.log(`imageNode.nodeName is: ${imageNode.nodeName}, imageNode.classList is: ${imageNode.classList}`)
+                        if(imageNode.nodeName == 'IMG' && !imageNode.classList.contains('active_img')){
+                            console.dir(mutation)
+                            var image_src = imageNode.attributes.src.value
+                            imageNode.onload = this_vc.prepare_for_resizing(image_src)
+                            // mutation.addedNodes['0'].onload = this_vc.setImageAreaProps
                         }
-
-
                     }
                 });
             });
@@ -221,49 +158,17 @@
                     subtree: true
                 }
             );
-
-            // var observer = new MutationObserver(function(mutations) {
-            //     mutations.forEach(function(mutation) {
-            //         for (var i = 0; i < mutation.addedNodes.length; i++)
-            //             insertedNodes.push(mutation.addedNodes[i]);
-            //     })
-            // });
-            // observer.observe(document, { childList: true });
-            // console.log(insertedNodes);
-
-
-
-            // this.$nextTick(function () {
-            //     richEditor.document.open();
-            //     richEditor.document.close();
-            //     richEditor.document.designMode = 'on'
-            //     richEditor.focus()
-
-            // var vc = this
-            // vc.$on('blur', this.returnFocusBack())
-            // if (document.querySelector('#editor-box')){
-            //     console.log('document activated?: ' + vc.activated)
-                // richEditor.focus()
-
-            // })
-        // },
-        // activated: function() {
-        //   console.log('activated')
-          // richEditor.document.open()
-          // richEditor.document.close()
-          // var eMouseOver = new Event('mouseover')
-          // var eClick = new Event('click')
-          // richEditor.dispatchEvent(eMouseOver)
-          // richEditor.dispatchEvent(eClick)
-          // console.log('richEditor.document.designMode: ' + richEditor.document.designMode )
-          // console.log('richEditor.document.hasFocus: ' + richEditor.document.hasFocus())
-          // richEditor.document.designMode = 'on'
-          // richEditor.document
-          // richEditor.focus()
         },
         methods: {
             richParamChange: function(e){
+
+                if(e.keyCode === 13){
+                    console.log('!!! ENTER is down on up !!!')
+                }
+
+
                 console.log('richParamChange: hasChildNodes is: '+ document.querySelector('#richED').hasChildNodes())
+
                 if(document.querySelector('#richED').hasChildNodes()){
                     var presumablyEditableP = document.querySelector('#richED').lastChild
                     if(document.querySelector('#richED').lastChild.nodeType === Node.TEXT_NODE){
@@ -283,22 +188,18 @@
                 console.log('BBBBBBBBBBB UUUUUUUUU MMMMMM!!!!!!!!!!!!!')
             },
             addBR: function(e){
-                if(e.target.children > 1){
-                    var editableP = document.querySelector('#richED').firstChild
-                    console.log('add BR')
-                    if(editableP.innerText.length === 0){
-                        console.log('editableP.innerText.length is 0')
-                        // editableP.contentEditable = false
-                        // var brTag = document.createElement('br')
-                        // editableP.appendChild(brTag)
+                if(e.target.children.length === 1){
+                    console.log('p tag quantity is 1')
+                    if(!e.target.lastChild.hasChildNodes()){
+                        console.log('p tag have dont have children')
+                        var brTag = document.createElement('br')
+                        e.target.lastChild.appendChild(brTag)
                     }
                 }
-
             },
-            deleteBR: function(targetP){
-                console.log('delete br')
-
-            },
+            // deleteBR: function(targetP){
+            //     console.log('delete br')
+            // },
             checkCharCount: function(e){
                 console.log('check char count')
                 console.log('#richED children length is: ' + e.target.children.length)
@@ -464,14 +365,74 @@
                 }
             },
             saveCoordinates: function(e){
-                var testResizeDiv = document.getElementById('testresize');
-                this.cursor.position.x = e.clientX - testResizeDiv.offsetLeft
-                this.cursor.position.y = e.clientY - testResizeDiv.offsetTop
-                // return("x = " + e.clientX + ", y = " + e.clientY)
+
+                // var testResizeDiv = document.getElementById('testresize');
+                this_vc.cursor.position.x = e.clientX - e.target.offsetLeft
+                this_vc.cursor.position.y = e.clientY - e.target.offsetTop
+
+                if(this_vc.mouse_down_on_IRH){
+                    // console.log('its process of resizing')
+                    // console.log(`coordinates is: x= ${this_vc.test_resizer_data.image.x1_lt}, y= ${this_vc.test_resizer_data.image.y1_lt}`)
+                    // this_vc.test_resizer_data.image.x1_lt = `${this_vc.cursor.position.x}px`
+                    // this_vc.test_resizer_data.image.y1_lt = `${this_vc.cursor.position.y}px`
+                    // console.log(`coordinates is: x= ${this_vc.test_resizer_data.image.x1_lt}, y= ${this_vc.test_resizer_data.image.y1_lt}`)
+
+                    // var half_of_width = parseInt(this_vc.test_resizer_data.width, 10)/2 // THIS IS BULLSHIT
+
+                    // var resizer = document.querySelector('#image_resizer')  // THIS IS BULLSHIT
+                    // console.log(`this_vc.test_resizer_data.handler.search('left') === -1 : ${this_vc.test_resizer_data.handler.search('left') === -1}`)
+                    // console.log(`this_vc.test_resizer_data.handler: ${this_vc.test_resizer_data.handler}`)
+                    // console.log(`1 or 2?: ${(this_vc.test_resizer_data.handler.search('left') === -1) ? 1 : 2}`)
+
+                    var x_start = parseInt((this_vc.test_resizer_data.handler.search('left') === -1) ? this_vc.test_resizer_data.image.x2_rt : this_vc.test_resizer_data.left)
+
+                    // console.log(`x_start: ${x_start}`)
+                    // var left_or_right = (x_start === parseInt(this_vc.test_resizer_data.left)) ? 'left' : 'right'
+
+
+                    // if()
+
+                    // <new code
+                    // var resizeFromLeftSide = this_vc.test_resizer_data.handler.search('left') != -1
+
+                    // resizeFromLeftSide ? this_vc.test_resizer_data.left : this_vc.test_resizer_data.image.x2_rt
+                    // var x_start = parseInt(resizeFromLeftSide ? this_vc.test_resizer_data.left : this_vc.test_resizer_data.image.x2_rt)
+                    // var  x_old =  parseInt(this_vc.test_resizer_data.image.x1_old ? x_start : this_vc.test_resizer_data.image.x1_old)
+                    // var x_new = this_vc.cursor.position.x // это не нужно наверное
+                    // var width_old = parseInt(this_vc.test_resizer_data.width) // это тоже не нужно наверное
+
+
+                    // this_vc.test_resizer_data.width =  resizeFromLeftSide ? `${width_old - (x_new - x_old)}px` : `${width_old + (x_new - x_old)}px`
+                    // this_vc.test_resizer_data.image.x1_old = `${x_new}px`
+                    // this_vc.test_resizer_data.image.x2_rt = `${parseInt(this_vc.test_resizer_data.left) + parseInt(this_vc.test_resizer_data.width)}px`
+
+
+                    //new code>
+
+
+
+
+
+
+                    var x_old = isNaN(parseInt(this_vc.test_resizer_data.image.x1_old)) ? x_start : parseInt(this_vc.test_resizer_data.image.x1_old, 10)
+                    var x_new = this_vc.cursor.position.x
+                    var width_old = parseInt(this_vc.test_resizer_data.width)
+                    // console.log(`x_old: ${x_old}, x_new: ${x_new}, width_old: ${width_old}`)
+                    // console.log(`x_new - x_old: ${x_new - x_old}`)
+                    // console.log(`(width_old - (x_new - x_old): ${width_old - (x_new - x_old)}`)
+                    // console.log(`results if left: ${width_old - (x_new - x_old)}`)
+                    this_vc.test_resizer_data.width =  (this_vc.test_resizer_data.handler.search('left') != -1) ? `${width_old - (x_new - x_old)}px` : `${width_old + (x_new - x_old)}px`
+                    this_vc.test_resizer_data.image.x1_old = `${x_new}px`
+                    this_vc.test_resizer_data.image.x2_rt = `${parseInt(this_vc.test_resizer_data.left) + parseInt(this_vc.test_resizer_data.width)}px`
+                    // resizer.style.top = this_vc.test_resizer_data.image.y1_lt
+                    // resizer.style.left = this_vc.test_resizer_data.image.x1_lt
+                    // var handler = document.querySelector('div.top_left_handler')
+                    // handler.style.top = this_vc.test_resizer_data.image.y1_lt
+                    // handler.style.left = this_vc.test_resizer_data.image.x1_lt
+                }                // return("x = " + e.clientX + ", y = " + e.clientY)
             },
             onResize: function (x, y, width, height) {
                 console.log(`uh it resized x: ${x}, y: ${y}, width: ${width}, height: ${height}`)
-
             },
             onDrag: function (x, y) {
                 this.x = x
@@ -484,7 +445,6 @@
                 var formData = new FormData()
                 var xhr = new XMLHttpRequest()
                 // var token = document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                var vc = this
 
                 xhr.open("POST", "/posts/")
                 xhr.setRequestHeader('X-CSRF-Token', this.tokenCSRF())
@@ -495,7 +455,7 @@
                     if (xhr.readyState == 4) {
                         var respText = JSON.parse(xhr.responseText)
                         // var postId = respText.id
-                        vc.$root.$emit('newPostIsCreated', respText)
+                        this_vc.$root.$emit('newPostIsCreated', respText)
                     }
                 }
             },
@@ -504,7 +464,6 @@
             },
             imgUploadAndInsert: function (e) {
                 var RichED = document.querySelector('div[id="richED"]')
-                var vc = this
                 var formData = new FormData(document.forms.attachment);
                 var xhr = new XMLHttpRequest()
                 // var token = document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -547,34 +506,34 @@
                         // (!err) console.log('done');
                         //     });
                         // var image = new Image('/uploads/attachment/file/304/c3cea700e2e67f293250fdba6d42471d.jpg')
-                        var image = document.querySelector(`img[src='${fileUrl}']`)
-                        image.className = 'active_img'
-                        var resizableImg = image.cloneNode(true)
-                        resizableImg.className += ' res_img'
-                        // resizableImg.style.draggable = false
-                        resizableImg.draggable = false
-                        // resizableImg
-                        resizableImg.onclick = function(e){
-                            console.log('resizable image is clicked')
-                            // resizableImg.style.width = `${e.target.width - 100}px`
-                        }
-
-                        resizableImg.onmousedown = function(e){
-
-                            vc.activateImageResizer()
-
-                            console.log(` coordinates x, y: ${vc.cursor.position.x}, ${vc.cursor.position.y}`)
-                            e.target.onmousemove = function(e){
-                                console.log(` moved!!`)
-                            }
-                        }
-
-                        resizableImg.onmousemove = function(e){
-                            console.log(` moved!!`)
-                        }
-
-                        var resrg = document.querySelector('p.image_is_here')
-                        resrg.appendChild(resizableImg)
+                        // var image = document.querySelector(`img[src='${fileUrl}']`)
+                        // image.className = 'active_img'
+                        // var resizableImg = image.cloneNode(true)
+                        // resizableImg.className += ' res_img'
+                        // // resizableImg.style.draggable = false
+                        // resizableImg.draggable = false
+                        // // resizableImg
+                        // resizableImg.onclick = function(e){
+                        //     console.log('resizable image is clicked')
+                        //     // resizableImg.style.width = `${e.target.width - 100}px`
+                        // }
+                        //
+                        // resizableImg.onmousedown = function(e){
+                        //
+                        //     this_vc.activateImageResizer()
+                        //
+                        //     console.log(` coordinates x, y: ${this_vc.cursor.position.x}, ${this_vc.cursor.position.y}`)
+                        //     e.target.onmousemove = function(e){
+                        //         console.log(` moved!!`)
+                        //     }
+                        // }
+                        //
+                        // resizableImg.onmousemove = function(e){
+                        //     console.log(` moved!!`)
+                        // }
+                        //
+                        // var resrg = document.querySelector('p.image_is_here')
+                        // resrg.appendChild(resizableImg)
 
                             // alert(image.width + 'x' + image.height);
                             // console.log(`sizes: ${image}`)
@@ -789,16 +748,24 @@
             },
             setImageAreaProps: function(e){
                 console.log('TARGET WIDTH ' + e.target.naturalWidth + 'TARGET HEIGHT ' + e.target.naturalHeight)
-                this.active_image.he = e.target.height
-                this.active_image.wi = e.target.width
+                this_vc.active_image.he = e.target.height
+                this_vc.active_image.wi = e.target.width
                 var act_img = document.querySelector('p.image_is_here')
                 act_img.style.width = `${e.target.width}px`
                 act_img.style.height = `${e.target.height}px`
                 console.log(`act_img.top: ${act_img.offsetTop}, act_img.left: ${act_img.offsetLeft}`)
-                this.test_resizer_data.top = `${act_img.offsetTop}px`
-                this.test_resizer_data.left = `${act_img.offsetLeft}px`
-                this.test_resizer_data.height = `${e.target.height - 1}px`
-                this.test_resizer_data.width = `${e.target.width - 1}px`
+                this_vc.test_resizer_data.top = `${act_img.offsetTop}px`
+                this_vc.test_resizer_data.left = `${act_img.offsetLeft}px`
+                this_vc.test_resizer_data.height = `${e.target.height - 1}px`
+                this_vc.test_resizer_data.width = `${e.target.width - 1}px`
+                this_vc.test_resizer_data.image.x1_lt = `${parseInt(this_vc.test_resizer_data.left, 10)}px`
+                this_vc.test_resizer_data.image.x2_rt = `${parseInt(this_vc.test_resizer_data.left, 10) + parseInt(this_vc.test_resizer_data.width, 10)}px`
+                // this.test_resizer_data.image.x3_lb = this.this.test_resizer_data.left
+                // this.test_resizer_data.image.x4_rb = this.this.test_resizer_data.left
+                // this.test_resizer_data.image.y1_lt = this.this.test_resizer_data.left
+                // this.test_resizer_data.image.y2_rt = this.this.test_resizer_data.left
+                // this.test_resizer_data.image.y3_lb = this.this.test_resizer_data.left
+                // this.test_resizer_data.image.y4_rb = this.this.test_resizer_data.left
             },
             resize_motherfucker: function(e){
 
@@ -807,8 +774,62 @@
                 document.querySelector('#image_resizer').classList.add('its_active')
                 var image = document.querySelector('p.image_is_here')
 
-            }
+            },
+            prepare_for_resizing(fileUrl){
+                var image = document.querySelector(`img[src='${fileUrl}']`)
+                image.className = 'active_img'
 
+                var resizableImg = image.cloneNode(true)
+                resizableImg.className += ' res_img'
+                // resizableImg.style.draggable = false
+                resizableImg.draggable = false
+                // resizableImg
+                resizableImg.onclick = function(e){
+                    console.log('resizable image is clicked')
+                    // resizableImg.style.width = `${e.target.width - 100}px`
+                }
+
+                resizableImg.onmousedown = function(e){
+
+                    this_vc.setImageAreaProps(e)
+                    this_vc.activateImageResizer(e)
+
+                    console.log(` coordinates x, y: ${this_vc.cursor.position.x}, ${this_vc.cursor.position.y}`)
+                    // e.target.onmousemove = function(e){
+                    //     console.log(` moved!!`)
+                    // }
+                }
+
+                resizableImg.onmousemove = function(e){
+                    console.log(` moved!!`)
+                }
+
+                var resrg = document.querySelector('p.image_is_here')
+                resrg.appendChild(resizableImg)
+                // this_vc.setImageAreaProps
+            },
+            resize_image: function(e){
+                console.log(this_vc.mouse_down_on_IRH)
+                if(this_vc.mouse_down_on_IRH){
+                    console.log(`e.target.className: ${e.target.classList}`)
+                    console.log(`e.target.className[e.target.className.length - 1]: ${e.target.classList[e.target.classList.length - 1]}`)
+                    var index = e.target.classList.length - 1
+                    console.log(`e.target.className.length - 1: ${index}`)
+                    console.log(`e.target.className[e.target.className.length - 1]: ${e.target.classList[index]}`)
+                    this_vc.test_resizer_data.handler = e.target.classList[e.target.classList.length - 1]
+                    console.log('resize_image')
+                    console.log(`this_vc.test_resizer_data.handler: ${this_vc.test_resizer_data.handler}`)
+                }
+            },
+            stop_resize_image: function(e){
+                this_vc.mouse_down_on_IRH = false
+                console.log(this_vc.mouse_down_on_IRH)
+                if(!this_vc.mouse_down_on_IRH){
+                    console.log('stop_resize_image')
+                    this_vc.test_resizer_data.image.x1_old = ''
+                    this_vc.test_resizer_data.handler = ''
+                }
+            }
         }
     }
 </script>
@@ -844,60 +865,27 @@
         &.top_left_handler{
             top: -5px;
             left: -5px;
+            cursor: nw-resize;
         }
 
         &.top_right_handler{
             top: -5px;
             right: -5px;
+            cursor: ne-resize;
         }
 
         &.down_left_handler{
             bottom: -5px;
             left: -5px;
+            cursor: sw-resize;
         }
 
         &.down_right_handler{
             bottom: -5px;
             right: -5px;
+            cursor: se-resize;
         }
     }
-
-    /*.top_left_handler{*/
-        /*width: 10px;*/
-        /*height: 10px;*/
-        /**/
-    /*}*/
-    /*.top_right_handler{*/
-        /*width: 10px;*/
-        /*height: 10px;*/
-        /*top: 2px;*/
-        /*right: 2px;*/
-    /*}*/
-    /*.down_left_handler{*/
-        /*width: 10px;*/
-        /*height: 10px;*/
-        /*bottom: 2px;*/
-        /*left: 2px;*/
-    /*}*/
-    /*.down_right_handler{*/
-        /*width: 10px;*/
-        /*height: 10px;*/
-        /*bottom: 2px;*/
-        /*right: 2px;*/
-    /*}*/
-
-    /*.top_left_handler{*/
-        /**/
-    /*}*/
-    /*.top_right_handler{*/
-        /**/
-    /*}*/
-    /*.down_left_handler{*/
-        /**/
-    /*}*/
-    /*.down_right_handler{*/
-        /**/
-    /*}*/
 
     #placeholder2{ // second example
         display: block;

@@ -9,11 +9,11 @@
 
             <p class="image_is_here" @mousedown="resize_motherfucker" style="left: 20px;"></p>
 
-            <div id='image_resizer' class="image_resizer" :style="test_resizer_data">
-                <div class="resize_handlers top_left_handler" @mousedown="resize_image"   ></div>
-                <div class="resize_handlers top_right_handler" @mousedown="resize_image"  ></div>
-                <div class="resize_handlers down_left_handler" @mousedown="resize_image"   ></div>
-                <div class="resize_handlers down_right_handler" @mousedown="resize_image"   ></div>
+            <div id='image_resizer' class="image_resizer" :style="test_resizer_data" >
+                <div class="resize_handlers top_left_handler" @mousedown="resize_image"></div>
+                <div class="resize_handlers top_right_handler" @mousedown="resize_image"></div>
+                <div class="resize_handlers down_left_handler" @mousedown="resize_image"></div>
+                <div class="resize_handlers down_right_handler" @mousedown="resize_image"></div>
             </div>
         </div>
 
@@ -62,12 +62,14 @@
     import { fabric } from 'fabric'
 
     var tag_names = ['b', 'i']
-    var this_vc = null
+    var this_vc, tokenCSRF, imageResizer
 
     export default {
         data: function(){
           return {
               abcdefg: 0,
+              cursor_over_image_resizer: false,
+
               // active_image: {
               //     url: '',
               //     wi: 30,
@@ -75,6 +77,7 @@
               //     changed_width: 0,
               //     changed_height: 0
               // },
+              mouseupped_on_image_resizer: false,
               mouse_down_on_IRH: false,
               mouse_on_editor: false,
               hidePlaceholderSpan: false,
@@ -133,7 +136,19 @@
         },
         mounted: function(){
             document.execCommand("defaultParagraphSeparator", false, "p")
+            tokenCSRF = document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             this_vc = this
+            imageResizer = document.querySelector('#image_resizer')
+
+
+            // var imageResizeArea = document.querySelector('#testresize')
+
+
+
+            // imageResizeArea.onclick = function(event){
+            //     console.log('event_target')
+            //     console.dir( event.target)
+            // }
 
             var observer = new MutationObserver(function(mutations) {
                 mutations.forEach(function(mutation) {
@@ -146,7 +161,6 @@
                             console.dir(mutation)
                             var image_src = imageNode.attributes.src.value
                             imageNode.onload = this_vc.prepare_for_resizing(image_src)
-                            // mutation.addedNodes['0'].onload = this_vc.setImageAreaProps
                         }
                     }
                 });
@@ -354,11 +368,11 @@
                 this.mouse_on_editor = false
             },
             saveCoordinates: function(e){
-                var testResizeDiv = document.getElementById('testresize');
-                this_vc.cursor.position.x = e.clientX - testResizeDiv.offsetLeft
-                this_vc.cursor.position.y = e.clientY - testResizeDiv.offsetTop
-
                 if(this_vc.mouse_down_on_IRH){
+
+                    var testResizeDiv = document.getElementById('testresize');
+                    this_vc.cursor.position.x = e.clientX - testResizeDiv.offsetLeft
+                    this_vc.cursor.position.y = e.clientY - testResizeDiv.offsetTop
 
                     var resizeFromLeftSide = this_vc.test_resizer_data.handler.search('left') != -1
 
@@ -368,8 +382,13 @@
                     var  x_old =  isNaN(parseInt(this_vc.test_resizer_data.image.x1_old)) ? x_start : parseInt(this_vc.test_resizer_data.image.x1_old, 10)
                     var x_new = this_vc.cursor.position.x // это не нужно наверное
                     var width_old = parseInt(this_vc.test_resizer_data.width) // это тоже не нужно наверное
+                    var resizedImage = document.querySelector('img.active_img')
+
 
                     this_vc.test_resizer_data.width =  resizeFromLeftSide ? `${width_old - (x_new - x_old)}px` : `${width_old + (x_new - x_old)}px`
+                    resizedImage.style.width = `${parseInt(this_vc.test_resizer_data.width) + 1}px`
+
+                    this_vc.test_resizer_data.height = `${parseInt(getComputedStyle(resizedImage).height) - 1}px`
                     this_vc.test_resizer_data.image.x1_old = `${x_new}px`
                     this_vc.test_resizer_data.image.x2_rt = `${parseInt(this_vc.test_resizer_data.left) + parseInt(this_vc.test_resizer_data.width)}px`
                 }
@@ -381,7 +400,7 @@
                 var xhr = new XMLHttpRequest()
 
                 xhr.open("POST", "/posts/")
-                xhr.setRequestHeader('X-CSRF-Token', this.tokenCSRF())
+                xhr.setRequestHeader('X-CSRF-Token', tokenCSRF)
 
                 formData.append("content", content)
                 xhr.send(formData)
@@ -402,7 +421,7 @@
                 // var token = document.querySelector('meta[name="csrf-token"]').getAttribute('content')
 
                 xhr.open("POST", "/attachments/")
-                xhr.setRequestHeader('X-CSRF-Token', this.tokenCSRF())
+                xhr.setRequestHeader('X-CSRF-Token', tokenCSRF)
 
                 xhr.send(formData)
                 xhr.onreadystatechange = function(){
@@ -542,7 +561,7 @@
             anchorizeImg: function(){
 
             },
-            tokenCSRF () {
+            tokenCSRF () { // make it variable
                 return document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
             returnFocusBack () {
@@ -575,20 +594,14 @@
                 // var lastParentNode = document.getSelection().anchorNode.parentNode
                 // var tagnamestyle = lastParentNode.tagName.toLowerCase()
                 // var pTagQuantity = document.querySelector('#richED').children.length
-                var editableP = null
+                var editableP
+                var reditor = this_vc.$refs.reditor
                 // var editableP = document.querySelector('#richED').firstChild
 
-                if(document.querySelector('#richED').hasChildNodes()){
-                    editableP = document.querySelector('#richED').firstChild
+                if(reditor.hasChildNodes()){
+                    editableP = reditor.firstChild
 
-                    if(!editableP.hasChildNodes()){
-                        // var editableP = document.querySelector('#richED').firstChild
-                        if(editableP.innerText.length <= 1){
-
-                        }
-                    }
-                    console.log('anchorNode is: ' + document.getSelection().anchorNode)
-                    var all_nodes_names = this.returnNotDivLastParentNodesNames(document.getSelection().anchorNode)
+                    var all_nodes_names = this_vc.returnNotDivLastParentNodesNames(document.getSelection().anchorNode)
 
                     if(all_nodes_names.length == 0){
                         for(var prop in this.buttons_activity) {
@@ -597,86 +610,24 @@
                     }else{
                         for (let tagname of tag_names){
                             if (all_nodes_names.includes(tagname)){
-                                this.buttons_activity[`${tagname}_active`] = true
+                                this_vc.buttons_activity[`${tagname}_active`] = true
                             }else{
-                                this.buttons_activity[`${tagname}_active`] = false
+                                this_vc.buttons_activity[`${tagname}_active`] = false
                             }
                         }
-
-
                     }
-
-                }
-                // if(pTagQuantity <= 1){
-                //     if(!editableP.hasChildNodes()){
-                        var editableP = document.querySelector('#richED').firstChild
-                        // if(editableP.innerText.length <= 1){
-                        //
-                        // }
-                    // }
-                // }
-                // var all_nodes_names = this.returnNotDivLastParentNodesNames(document.getSelection().anchorNode)
-
-                // this.checkStyle()
-                // console.log('checked!!! and style or parantnode tag is: ' + tagnamestyle)
-
-                // if(all_nodes_names.length == 0){
-                //     for(var prop in this.buttons_activity) {
-                //         this.buttons_activity[prop] = false
-                //     }
-                // }else{
-                //     for (let tagname of tag_names){
-                //         if (all_nodes_names.includes(tagname)){
-                //             this.buttons_activity[`${tagname}_active`] = true
-                //         }else{
-                //             this.buttons_activity[`${tagname}_active`] = false
-                //         }
-                //     }
-                //
-                //
-                // }
-                // if(tag_names.includes(tagnamestyle)){
-                //     this.buttons_activity[`${tagnamestyle}_active`] = true
-                // }else{
-                //     for(var prop in this.buttons_activity) {
-                //         this.buttons_activity[prop] = false
-                //     }
-                    // this.buttons_activity = false
-                // }
-
-                // if (tagnamestyle == 'b'){
-                //     console.log('da its tag b')
-                //     console.log(this['buttons_activity'][`${tagnamestyle}_active`])
-                //     console.log(`${tagnamestyle}_active`)
-                //     this.#{tagnamestyle}_active
-                    // this.buttons_activity.b_active = true
-                // } else {
-                //     this.buttons_activity.b_active = false
-                // }
-            },
-            checkStyle () {
-                var tagname = document.getSelection().anchorNode.parentNode.tagName.toLowerCase()
-                if(tagname != 'div'){
-
-                    // console.log('not a div!!!')
-                } else {
-                    console.log('anchornode: ' + document.getSelection().anchorNode.tagName)
-                    console.log('parentnode: ' + document.getSelection().anchorNode.parentNode.tagName)
-                    console.log('tag: ' + tagname)
                 }
             },
             returnNotDivLastParentNodesNames (node) {
                 var node_names = []
                 if(node != null){
                     var i = (node.tagName != undefined) ? node : node.parentNode
-                    // console.log('NOT IN WHILE, i is: ' + i.tagName)
 
                     while(i.tagName != 'DIV' && i.tagName!= undefined && i.tagName != 'CANVAS'){
                         node_names.push(i.tagName.toLowerCase())
                         i = i.parentNode
                     }
                 }
-
                 return node_names
             },
             setImageAreaProps: function(e){
@@ -703,10 +654,68 @@
             resize_motherfucker: function(e){
 
             },
-            activateImageResizer: function(e){
-                document.querySelector('#image_resizer').classList.add('its_active')
-                var image = document.querySelector('p.image_is_here')
+            toggle_image_resizer_activity: function(e){
+                console.log(`cursor_over_image_resizer: ${this_vc.cursor_over_image_resizer}`)
+                console.log('e IS')
+                console.dir(e)
+                console.log('event.target')
+                console.dir(e.target)
+                console.log('event.currentTarget')
+                console.dir(e.currentTarget)
+                console.log('toggle_image_resizer_activity')
+                console.log(imageResizer.style.display)
+                console.log(imageResizer.display)
+                console.log(imageResizer.hidden)
+                console.log(getComputedStyle(imageResizer).display)
+                console.log(`e.target.id= ${e.target.id}`)
+                console.log(`imageResizer.classList.contains('its_active'): ${imageResizer.classList.contains('its_active')}`)
 
+                if(e.target.classList.contains('active_img')){
+                    console.log(`e.target.classList.contains('active_img'): ${e.target.classList.contains('active_img')}`)
+                    imageResizer.classList.add('its_active')
+
+                    // e.stopPropagation
+                }else if(e.target.id === 'testresize' &&  imageResizer.classList.contains('its_active') && this_vc.cursor_over_image_resizer !== true && this_vc.mouseupped_on_image_resizer === false){
+                    console.log(`e.target.id === 'testresize': ${e.target.id === 'testresize'},imageResizer.classList.contains('its_active'): ${imageResizer.classList.contains('its_active')} `)
+                    imageResizer.classList.remove('its_active')
+                }else {
+                    console.log('last ELSE')
+                    console.log(`e.target.id === 'testresize': ${e.target.id === 'testresize'},imageResizer.classList.contains('its_active'): ${imageResizer.classList.contains('its_active')} `)
+                    if(!e.target.classList.contains('active_img')){
+                        console.log(`e.target.classList.contains('active_img'): ${e.target.classList.contains('active_img')}`)
+                        this_vc.mouseupped_on_image_resizer = false
+                    }
+                    // this_vc.mouseupped_on_image_resizer = false
+                }
+
+
+                // if(e.target.id === 'testresize' &&  imageResizer.classList.contains('its_active')){
+                //     imageResizer.classList.remove('its_active')
+                // }
+
+                // if(e.target.id === 'image_resizer' && imageResizer.classList.contains('its_active')){
+                //     console.log()
+                //     imageResizer.classList.remove('its_active')
+                // }else if(e.target.id === 'testresize' &&){
+                //
+                // }
+
+                // if(document.querySelector('#image_resizer').classList.contains('its_active')){
+                //     document.querySelector('#image_resizer').classList.remove('its_active')
+                // }
+            },
+            activateImageResizer: function(){
+                document.querySelector('#image_resizer').classList.add('its_active')
+            },
+            unactivate_image_resizer: function(e){
+                console.log('target:')
+                console.log(e.target)
+                console.log('currentTarget')
+                console.dir(e.currentTarget)
+                console.log(`evaentPhase: ${e.eventPhase }`)
+                if(document.querySelector('#image_resizer').classList.contains('its_active')){
+                    document.querySelector('#image_resizer').classList.remove('its_active')
+                }
             },
             prepare_for_resizing(fileUrl){
                 var image = document.querySelector(`img[src='${fileUrl}']`)
@@ -714,24 +723,20 @@
 
                 var resizableImg = image.cloneNode(true)
                 resizableImg.className += ' res_img'
-                // resizableImg.style.draggable = false
                 resizableImg.draggable = false
-                // resizableImg
-                // resizableImg.onclick = function(e){
-                //     console.log('resizable image is clicked')
-                    // resizableImg.style.width = `${e.target.width - 100}px`
-                // }
+
 
                 resizableImg.onmousedown = function(e){
-
                     this_vc.setImageAreaProps(e)
+                    // this_vc.toggle_image_resizer_activity(e)
                     this_vc.activateImageResizer(e)
-
-                    // console.log(` coordinates x, y: ${this_vc.cursor.position.x}, ${this_vc.cursor.position.y}`)
-                    // e.target.onmousemove = function(e){
-                    //     console.log(` moved!!`)
-                    // }
                 }
+
+                // resizableImg.addEventListener('onclick',)
+
+                // resizableImg.onclick.capture = function(){
+                //     toggle_active_image_resizer
+                // }
 
                 resizableImg.onmousemove = function(e){
                     // console.log(` moved!!`)
@@ -739,32 +744,25 @@
 
                 var resrg = document.querySelector('p.image_is_here')
                 resrg.appendChild(resizableImg)
-                // this_vc.setImageAreaProps
             },
             resize_image: function(e){
                 this_vc.mouse_down_on_IRH = true
                 this_vc.test_resizer_data.handler = e.target.classList[e.target.classList.length - 1]
                 console.log('resize_image')
-                // console.log(this_vc.mouse_down_on_IRH)
-                // if(this_vc.mouse_down_on_IRH){
-                    // console.log(`e.target.className: ${e.target.classList}`)
-                    // console.log(`e.target.className[e.target.className.length - 1]: ${e.target.classList[e.target.classList.length - 1]}`)
-                    // var index = e.target.classList.length - 1
-                    // console.log(`e.target.className.length - 1: ${index}`)
-                    // console.log(`e.target.className[e.target.className.length - 1]: ${e.target.classList[index]}`)
-                    // this_vc.test_resizer_data.handler = e.target.classList[e.target.classList.length - 1]
-                    // console.log('resize_image')
-                    // console.log(`this_vc.test_resizer_data.handler: ${this_vc.test_resizer_data.handler}`)
-                // }
             },
             stop_resize_image: function(e){
-                this_vc.mouse_down_on_IRH = false
-                // console.log(this_vc.mouse_down_on_IRH)
-                // if(!this_vc.mouse_down_on_IRH){
+                if(this_vc.mouse_down_on_IRH === true){
+                    this_vc.mouse_down_on_IRH = false
                     console.log('stop_resize_image')
                     this_vc.test_resizer_data.image.x1_old = ''
                     this_vc.test_resizer_data.handler = ''
-                // }
+                }
+            },
+            tester_function: function(e){
+                console.log('tester function e.target')
+                console.dir(e.target)
+                console.log('tester function event.target')
+                console.dir(event.target)
             }
         }
     }

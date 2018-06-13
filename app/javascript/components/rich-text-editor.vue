@@ -2,20 +2,20 @@
 
     <div class="editable_content">
 
-        <div style="height: 1000px; width: 1000px; border: 1px solid red; position: relative;" @mousemove="saveCoordinates" @mouseup="stop_resize_image" id="testresize" >
-            <div>
-                x {{ cursor.position.x }}, y {{ cursor.position.y }}
-            </div>
+        <!--<div style="height: 1000px; width: 1000px; border: 1px solid red; position: relative;" @mousemove="saveCoordinates" @mouseup="stop_resize_image" id="testresize" >-->
+            <!--<div>-->
+                <!--x {{ cursor.position.x }}, y {{ cursor.position.y }}-->
+            <!--</div>-->
 
-            <p class="image_is_here" @mousedown="resize_motherfucker" style="left: 20px;"></p>
+            <!--<p class="image_is_here" @mousedown="resize_motherfucker" style="left: 20px;"></p>-->
 
-            <div id='image_resizer' class="image_resizer" :style="test_resizer_data" >
-                <div class="resize_handlers top_left_handler" @mousedown="resize_image"></div>
-                <div class="resize_handlers top_right_handler" @mousedown="resize_image"></div>
-                <div class="resize_handlers down_left_handler" @mousedown="resize_image"></div>
-                <div class="resize_handlers down_right_handler" @mousedown="resize_image"></div>
-            </div>
-        </div>
+            <!--<div id='image_resizer' class="image_resizer" :style="test_resizer_data" >-->
+                <!--<div class="resize_handlers top_left_handler" @mousedown="resize_image"></div>-->
+                <!--<div class="resize_handlers top_right_handler" @mousedown="resize_image"></div>-->
+                <!--<div class="resize_handlers down_left_handler" @mousedown="resize_image"></div>-->
+                <!--<div class="resize_handlers down_right_handler" @mousedown="resize_image"></div>-->
+            <!--</div>-->
+        <!--</div>-->
 
         <div class="edit-buttons">
 
@@ -41,10 +41,19 @@
             <input @change="imgUploadAndInsert" type="file" name="file" accept="image/*"  hidden/>
         </form>
 
-        <div id="richED" ref="reditor"  @mouseup="seeStyleOnTools" @keydown.enter="addBR"  @keydown.delete="prevent_p_deletion" contenteditable="true" @mouseover="mouseOnEditor" @mouseout="mouseOffEditor" @click="makeAreaActive"  @keyup.delete="before_deletion" @keydown="char_counter" @keyup="char_counter">
+        <div class="scoo_pee_dee_poo" style="height: 1000px; width: 1000px; border: 1px solid red; position: relative;" @mousemove="saveCoordinates" @mouseup="stop_resize_image" id="testresize">
+            <div id="richED" ref="reditor"  @mouseup="seeStyleOnTools" @keydown.enter="addBR"  @keydown.delete="prevent_p_deletion" contenteditable="true" @mouseover="mouseOnEditor" @mouseout="mouseOffEditor" @click="makeAreaActive"  @keyup.delete="before_deletion" @keydown="char_counter" @keyup="char_counter">
 
-            <p class="writer"></p>
+                <p class="writer"></p>
+            </div>
+            <div id='image_resizer' class="image_resizer" :style="test_resizer_data" >
+                <div class="resize_handlers top_left_handler" @mousedown="resize_image"></div>
+                <div class="resize_handlers top_right_handler" @mousedown="resize_image"></div>
+                <div class="resize_handlers down_left_handler" @mousedown="resize_image"></div>
+                <div class="resize_handlers down_right_handler" @mousedown="resize_image"></div>
+            </div>
         </div>
+
 
         <div class="saveAndPublic">
             <div class="saveContentAsPost" @click="saveAsPost">
@@ -67,10 +76,14 @@
     export default {
         data: function(){
           return {
+              mouse_over_resizer: false,
               abcdefg: 0,
               cursor_over_image_resizer: false,
-
-              // active_image: {
+              max_image_width: '800px',
+              active_image: {
+                  url:'',
+                  max_width: 0
+              },
               //     url: '',
               //     wi: 30,
               //     he: 30,
@@ -138,17 +151,10 @@
             document.execCommand("defaultParagraphSeparator", false, "p")
             tokenCSRF = document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             this_vc = this
+
             imageResizer = document.querySelector('#image_resizer')
-
-
-            // var imageResizeArea = document.querySelector('#testresize')
-
-
-
-            // imageResizeArea.onclick = function(event){
-            //     console.log('event_target')
-            //     console.dir( event.target)
-            // }
+            imageResizer.onmouseover = ()=>{ this_vc.mouse_over_resizer = true }
+            imageResizer.onmouseout = ()=>{ this_vc.mouse_over_resizer = false }
 
             var observer = new MutationObserver(function(mutations) {
                 mutations.forEach(function(mutation) {
@@ -383,6 +389,9 @@
                     var x_new = this_vc.cursor.position.x // это не нужно наверное
                     var width_old = parseInt(this_vc.test_resizer_data.width) // это тоже не нужно наверное
                     var resizedImage = document.querySelector('img.active_img')
+
+                    // this_vc.test_resizer_data.top = `${resizedImage.offsetTop}px`
+                    // this_vc.test_resizer_data.left= `${resizedImage.offsetLeft}px`
 
 
                     this_vc.test_resizer_data.width =  resizeFromLeftSide ? `${width_old - (x_new - x_old)}px` : `${width_old + (x_new - x_old)}px`
@@ -634,12 +643,16 @@
                 console.log('TARGET WIDTH ' + e.target.naturalWidth + 'TARGET HEIGHT ' + e.target.naturalHeight)
                 // this_vc.active_image.he = e.target.height
                 // this_vc.active_image.wi = e.target.width
-                var act_img = document.querySelector('p.image_is_here')
-                act_img.style.width = `${e.target.width}px`
-                act_img.style.height = `${e.target.height}px`
-                console.log(`act_img.top: ${act_img.offsetTop}, act_img.left: ${act_img.offsetLeft}`)
-                this_vc.test_resizer_data.top = `${act_img.offsetTop}px`
-                this_vc.test_resizer_data.left = `${act_img.offsetLeft}px`
+                // var act_img = document.querySelector('p.image_is_here')
+                // act_img.style.width = `${e.target.width}px`
+                // act_img.style.height = `${e.target.height}px`
+                // console.log(`act_img.top: ${act_img.offsetTop}, act_img.left: ${act_img.offsetLeft}`)
+                console.log(`e.target.offsetTop: ${e.target.offsetTop}, e.target.offsetLeft: ${e.target.offsetLeft}`)
+                // if(getComputedStyle(e.target).paddingTop === '16px'){
+                //     e.target.style.paddingTop = '0'
+                // }
+                this_vc.test_resizer_data.top = `${e.target.offsetTop}px`
+                this_vc.test_resizer_data.left = `${e.target.offsetLeft}px`
                 this_vc.test_resizer_data.height = `${e.target.height - 1}px`
                 this_vc.test_resizer_data.width = `${e.target.width - 1}px`
                 this_vc.test_resizer_data.image.x1_lt = `${parseInt(this_vc.test_resizer_data.left, 10)}px`
@@ -648,13 +661,14 @@
                 // this.test_resizer_data.image.x4_rb = this.this.test_resizer_data.left
                 // this.test_resizer_data.image.y1_lt = this.this.test_resizer_data.left
                 // this.test_resizer_data.image.y2_rt = this.this.test_resizer_data.left
-                // this.test_resizer_data.image.y3_lb = this.this.test_resizer_data.left
+                // getComputedStyle(e.target).paddingTop        // this.test_resizer_data.image.y3_lb = this.this.test_resizer_data.left
                 // this.test_resizer_data.image.y4_rb = this.this.test_resizer_data.left
             },
             resize_motherfucker: function(e){
 
             },
             toggle_image_resizer_activity: function(e){
+                // if(e.target.)
                 console.log(`cursor_over_image_resizer: ${this_vc.cursor_over_image_resizer}`)
                 console.log('e IS')
                 console.dir(e)
@@ -721,16 +735,40 @@
                 var image = document.querySelector(`img[src='${fileUrl}']`)
                 image.className = 'active_img'
 
-                var resizableImg = image.cloneNode(true)
-                resizableImg.className += ' res_img'
-                resizableImg.draggable = false
+                // var resizableImg = image.cloneNode(true)
+                // resizableImg.className += ' res_img'
+                // resizableImg.draggable = false
+                image.className += ' res_img'
+                image.className += ' inserted_image'
+                image.style.verticalAlign = 'top'
+                image.style.maxWidth = this_vc.max_image_width
+                image.style.display = 'block'
+                if(getComputedStyle(image).paddingTop === '16px'){
+                    image.style.paddingTop = '0'
+                }
+                // image.style.marginTop = '-16px'
+                // image.draggable = false - NEED TO ADD LATER
 
+                // image.onmouseover = function(){
+                //     this_vc.mouse_over_resizer = true
+                // }
 
-                resizableImg.onmousedown = function(e){
+                // image.onmouseover = () => {
+                //     this_vc.mouse_over_resizer = true
+                // }
+
+                image.onmousedown = function(e){
                     this_vc.setImageAreaProps(e)
+                    // this_vc.
                     // this_vc.toggle_image_resizer_activity(e)
                     this_vc.activateImageResizer(e)
                 }
+
+                // resizableImg.onmousedown = function(e){
+                //     this_vc.setImageAreaProps(e)
+                //     this_vc.toggle_image_resizer_activity(e)
+                //     this_vc.activateImageResizer(e)
+                // }
 
                 // resizableImg.addEventListener('onclick',)
 
@@ -738,12 +776,12 @@
                 //     toggle_active_image_resizer
                 // }
 
-                resizableImg.onmousemove = function(e){
+                // resizableImg.onmousemove = function(e){
                     // console.log(` moved!!`)
-                }
+                // }
 
-                var resrg = document.querySelector('p.image_is_here')
-                resrg.appendChild(resizableImg)
+                // var resrg = document.querySelector('p.image_is_here')
+                // resrg.appendChild(resizableImg)
             },
             resize_image: function(e){
                 this_vc.mouse_down_on_IRH = true
@@ -771,12 +809,22 @@
 
 <style lang="scss" scoped>
 
+    .scoo_pee_dee_poo{
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+
+    .inserted_image{
+        vertical-align: top;
+    }
+
     .image_resizer{
         position: absolute;
         border: solid 1px #1e88e5;
         display: none;
         user-select: none;
         box-sizing: content-box;
+        max-width: 800px;
 
         &.its_active{
             display: block
@@ -923,11 +971,14 @@
 
     #richED{
         position: relative;
-        height: 400px;
+        box-sizing: content-box;
+        /*height: 400px;*/
         min-height: 399px;
         width: 800px;
-        overflow-x: hidden;
-        overflow-y: auto;
+        height: auto;
+        overflow: hidden;
+        /*overflow-x: auto;*/
+        /*overflow-y: visible;*/
         border: 0;
         box-shadow: 0 1px 3px rgba(0,0,0,0.12),0 1px 1px 1px rgba(0,0,0,0.16);
         background: white;
@@ -971,6 +1022,12 @@
         resize: both;
         overflow: hidden;
     }
+
+    /*p{*/
+        /*margin: 0 0 10px;*/
+        /*width: 100%;*/
+        /*!*height: 0;*!*/
+    /*}*/
 
     /*img{*/
         /*resize: both;*/
@@ -1038,6 +1095,8 @@
         line-height: 1.5;
     }
     p {
+        text-align: left;
+        vertical-align: middle;
         line-height: 1.5;
         margin: 16px 0 0;
     }

@@ -31,7 +31,7 @@
 
                 <p class="writer"></p>
             </div>
-            <div id='image_resizer' class="image_resizer" :style="test_resizer_data" >
+            <div id='image_resizer' class="image_resizer" :style="test_resizer_data" tabindex="105">
                 <div class="resize_handlers top_left_handler" @mousedown="resize_image"></div>
                 <div class="resize_handlers top_right_handler" @mousedown="resize_image"></div>
                 <div class="resize_handlers down_left_handler" @mousedown="resize_image"></div>
@@ -56,11 +56,14 @@
     import { fabric } from 'fabric'
 
     var tag_names = ['b', 'i']
-    var this_vc, tokenCSRF, imageResizer
+    var this_vc, tokenCSRF, imageResizer, imgResizerHandlers
 
     export default {
         data: function(){
           return {
+
+              current_resizing_image: null,
+              image_load_status: null,
               resizer_mouse_status: 11,
               resizer_mouse_statuses: {
                   11: 'none',
@@ -74,7 +77,7 @@
               mouse_over_resizer: false,
               abcdefg: 0,
               mouse_over_image_resizer: false,
-              max_image_width: '800px',
+              max_image_width: '799px',
               active_image: {
                   url:'',
                   max_width: 0
@@ -93,6 +96,7 @@
                   height: '300px',
                   top: '500px',
                   left: '400px',
+                  maxWidth: '798px',
                   image: {
                       x1_old: '',
                       x1_lt: '',
@@ -137,15 +141,53 @@
             }
         },
         mounted: function(){
+            document.onclick = (e) => {
+                console.log('activeElement is: ')
+                console.dir(document.activeElement)
+
+                console.log('reditor is: ')
+                console.dir(this_vc.$refs.reditor)
+
+                console.log('event target is: ')
+                console.dir(e.target)
+
+                if(e.target != this_vc.$refs.reditor){
+                    console.log('its not reditor!')
+                }
+            }
             document.execCommand("defaultParagraphSeparator", false, "p")
             tokenCSRF = document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             this_vc = this
 
             imageResizer = document.querySelector('#image_resizer')
+
+            // imgResizerHandlers
+
             imageResizer.onmouseover = ()=>{ console.log('resizer mouseover'); this_vc.mouse_over_resizer = true ; this_vc.resizer_mouse_status = 2}
-            imageResizer.onmouseout = ()=>{ this_vc.mouse_over_resizer = false ; this_vc.resizer_mouse_status = 0}
-            imageResizer.onfocus = ()=>{ console.log('imageResizer in focus now') }
+            imageResizer.onmouseout = ()=>{ this_vc.mouse_over_resizer = false; this_vc.resizer_mouse_status = 0}
+            imageResizer.onfocus = ()=>{
+
+                if(imageResizer.classList.contains('sleep')){
+                    imageResizer.classList.remove('sleep')
+                    imageResizer.classList.add('its_active')
+                    imgResizerHandlers.forEach(function(el){ el.classList.remove('inactive') })
+                }
+                // console.log('imageResizer in focus now')
+            }
+
+            imageResizer.onblur = () => {
+                if(imageResizer.classList.contains('its_active')){
+                    imageResizer.classList.remove('its_active')
+                    imageResizer.classList.add('sleep')
+                    imgResizerHandlers.forEach(function(el){ el.classList.add('inactive') })
+                }
+            }
             imageResizer.onmousedown = () => {
+                if(imageResizer.classList.contains('sleep')){
+                    imageResizer.classList.remove('sleep')
+                    imageResizer.classList.add('its_active')
+                    imgResizerHandlers.forEach(function(el){ el.classList.remove('inactive') })
+                }
                 this_vc.resizer_mouse_status = 3
                 // case this_vc.resizer_mouse_status
                 // when 2
@@ -167,8 +209,25 @@
                         console.log(`imageNode.nodeName is: ${imageNode.nodeName}, imageNode.classList is: ${imageNode.classList}`)
                         if(imageNode.nodeName == 'IMG' && !imageNode.classList.contains('active_img')){
                             console.dir(mutation)
+                            console.log('IMAGE NODE and attributes: ')
+                            console.dir(imageNode)
+                            console.log('imageNode.imageNode.attributes')
+                            console.dir(imageNode.attributes)
+                            // var image = new Image
                             var image_src = imageNode.attributes.src.value
+
                             imageNode.onload = this_vc.prepare_for_resizing(image_src)
+                            // image.onload = this_vc.prepare_for_resizing(image_src)
+
+                            imageNode.addEventListener('load', function(){
+                                console.log('image Node is loadede!!!!!')
+                                console.log('image node is complete: ' + imageNode.complete)
+                                var imgTag = document.querySelector(`img[src='${image_src}']`)
+                                this_vc.set_img_resizer_params(imgTag, 'sleep')
+                            }, UIEvent)
+
+                            // image.src = imageNode.attributes.src.value
+                            // console.log(`image is load complete?: ${image.complete}`)
                         }
                     }
                 });
@@ -189,6 +248,32 @@
             )
 
 
+            // var imageUploadObserver = new MutationObserver(function(mutations) {
+            //     mutations.forEach(function(mutation) {
+            //         if(mutation.addedNodes.length > 0){
+            //             console.log(mutation.addedNodes['0'])
+            //             var imageNode =  mutation.addedNodes['0']
+            //             console.log(`imageNode.nodeName is: ${imageNode.nodeName}, imageNode.classList is: ${imageNode.classList}`)
+            //             if(imageNode.nodeName == 'IMG' && !imageNode.classList.contains('active_img')){
+            //                 console.dir(mutation)
+            //                 console.log('IMAGE NODE and attributes: ')
+            //                 console.dir(imageNode)
+            //                 console.log('imageNode.imageNode.attributes')
+            //                 console.dir(imageNode.attributes)
+            //                 var image = new Image
+            //                 var image_src = imageNode.attributes.src.value
+            //
+            //                 imageNode.onload = this_vc.prepare_for_resizing(image_src)
+            //                 // image.onload = this_vc.prepare_for_resizing(image_src)
+            //
+            //                 // image.src = imageNode.attributes.src.value
+            //                 console.log(`image is load complete?: ${image.complete}`)
+            //             }
+            //         }
+            //     });
+            // });
+
+
 
             imageObserver.observe(
                 document.getElementById('richED'),
@@ -197,12 +282,18 @@
                     subtree: true
                 }
             );
+
+            // imageUploadObserver.observe(
+            //     document.getElementBy
+            // )
         },
         watch: {
             abcdefg: function(){
                 console.log('свойство было обновлено!!!')
-              
-          }  
+            },
+            current_resizing_image: function(){
+                console.log('current_resized_image было обновлено!!!')
+            }
         },
         methods: {
             char_counter: function(e){
@@ -306,6 +397,9 @@
                     var resizedImage = document.querySelector('img.active_img')
 
                     this_vc.test_resizer_data.width =  resizeFromLeftSide ? `${width_old - (x_new - x_old)}px` : `${width_old + (x_new - x_old)}px`
+                    // if(this_vc.test_resizer_data.width >= 801){
+                    //     this_vc.test_resizer_data.width = 600
+                    // }
                     resizedImage.style.width = `${parseInt(this_vc.test_resizer_data.width) + 1}px`
 
                     this_vc.test_resizer_data.height = `${parseInt(getComputedStyle(resizedImage).height) - 1}px`
@@ -461,8 +555,35 @@
                 // getComputedStyle(e.target).paddingTop        // this.test_resizer_data.image.y3_lb = this.this.test_resizer_data.left
                 // this.test_resizer_data.image.y4_rb = this.this.test_resizer_data.left
             },
-            resize_motherfucker: function(e){
-
+            set_img_resizer_params(img_element, resizer_mode){
+                imgResizerHandlers = document.querySelectorAll('.resize_handlers')
+                console.log(`img_element.offsetTop = ${img_element.offsetTop}, img_element.offsetLeft = ${img_element.offsetLeft}, clientWidth: ${getComputedStyle(img_element).clientWidth}, offsetWidth: ${getComputedStyle(img_element).offsetWidth}`)
+                console.log(`!!!! img_element is : ${img_element}`)
+                console.dir(img_element)
+                console.log('img_wlwmwnr styles: ')
+                console.log(getComputedStyle(img_element))
+                console.log('inlineSize: ')
+                console.log(getComputedStyle(img_element).inlineSize)
+                this_vc.test_resizer_data.top = `${img_element.offsetTop}px`
+                this_vc.test_resizer_data.left = `${img_element.offsetLeft}px`
+                this_vc.test_resizer_data.height = `${img_element.height - 1}px`
+                this_vc.test_resizer_data.width = `${img_element.width - 1}px`
+                this_vc.test_resizer_data.image.x1_lt = `${parseInt(this_vc.test_resizer_data.left, 10)}px`
+                this_vc.test_resizer_data.image.x2_rt = `${parseInt(this_vc.test_resizer_data.left, 10) + parseInt(this_vc.test_resizer_data.width, 10)}px`
+                this_vc.switch_resizer_mode(resizer_mode)
+                // switch (resizer_mode){
+                //     case 'active':
+                //         imageResizer.classList.remove('sleep')
+                //         imageResizer.classList.add('its_active')
+                //         break
+                //     case 'sleep':
+                //         imageResizer.classList.remove('its_active')
+                //         imageResizer.classList.add('sleep')
+                //         imgResizerHandlers.forEach(function(el){ el.classList.add('inactive')})
+                //         break
+                //     default:
+                //         break
+                // }
             },
             toggle_image_resizer_activity: function(e){
                 // if(e.target.)
@@ -534,9 +655,27 @@
                     document.querySelector('#image_resizer').classList.remove('its_active')
                 }
             },
+            switch_resizer_mode(mode){
+                switch (mode){
+                    case 'active':
+                        imageResizer.classList.remove('sleep')
+                        imageResizer.classList.add('its_active')
+                        break
+                    case 'sleep':
+                        imageResizer.classList.remove('its_active')
+                        imageResizer.classList.add('sleep')
+                        imgResizerHandlers.forEach(function(el){ el.classList.add('inactive')})
+                        break
+                    default:
+                        break
+                }
+            },
             prepare_for_resizing(fileUrl){
+
+
                 var image = document.querySelector(`img[src='${fileUrl}']`)
                 image.className = 'active_img'
+                console.log('prepare_for_resizing image is complete:  ' + image.complete)
 
                 // var resizableImg = image.cloneNode(true)
                 // resizableImg.className += ' res_img'
@@ -560,14 +699,28 @@
                 //     this_vc.mouse_over_resizer = true
                 // }
 
+                // OLD VERSION:
+                // image.onmousedown = function(e){
+                //     this_vc.setImageAreaProps(e)
+                //     this_vc.
+                //     this_vc.toggle_image_resizer_activity(e)
+                    // console.log('image.onmousedown')
+                    // console.dir(document.getSelection())
+                    // this_vc.activateImageResizer(e)
+                // }
+                // NEW VERSION:
+                // this_vc.set_img_resizer_params(image, 'sleep')
                 image.onmousedown = function(e){
                     this_vc.setImageAreaProps(e)
                     // this_vc.
                     // this_vc.toggle_image_resizer_activity(e)
+                    console.log('image.onload is complete:  ' + image.complete)
                     console.log('image.onmousedown')
                     console.dir(document.getSelection())
                     this_vc.activateImageResizer(e)
                 }
+
+
 
                 // resizableImg.onmousedown = function(e){
                 //     this_vc.setImageAreaProps(e)
@@ -591,7 +744,7 @@
             resize_image: function(e){
                 this_vc.mouse_down_on_IRH = true
                 this_vc.test_resizer_data.handler = e.target.classList[e.target.classList.length - 1]
-                console.log('resize_image')
+                console.log(`resize_image, this_vc.test_resizer_data.handler: ${this_vc.test_resizer_data.handler}`)
             },
             stop_resize_image: function(e){
                 if(this_vc.mouse_down_on_IRH === true){
@@ -624,6 +777,7 @@
     }
 
     .image_resizer{
+        tab-index: 100;
         position: absolute;
         border: solid 1px #1e88e5;
         display: none;
@@ -633,6 +787,16 @@
 
         &.its_active{
             display: block
+        }
+
+        &.sleep{
+            display: block;
+            border: none;
+        }
+
+        &:focus{
+            outline: none;
+            /*border: none;*/
         }
     }
 
@@ -671,6 +835,11 @@
             bottom: -5px;
             right: -5px;
             cursor: se-resize;
+        }
+
+        &.inactive{
+            display: none;
+            pointer-events: none;
         }
     }
 

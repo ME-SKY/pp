@@ -27,10 +27,12 @@
         </form>
 
         <div class="scoo_pee_dee_poo" style="height: 1000px; width: 1000px; border: 1px solid red; position: relative;" @mousemove="saveCoordinates" @mouseup="stop_resize_image" id="testresize">
+
             <div id="richED" ref="reditor"  @mouseup="seeStyleOnTools" @keydown.enter="addBR"  @keydown.delete="prevent_p_deletion" contenteditable="true" @mouseover="mouseOnEditor" @mouseout="mouseOffEditor" @click="makeAreaActive"  @keyup.delete="before_deletion" @keydown="char_counter" @keyup="char_counter">
 
                 <p class="writer"></p>
             </div>
+
             <div id='image_resizer' class="image_resizer" :style="test_resizer_data" tabindex="105">
                 <div class="resize_handlers top_left_handler" @mousedown="resize_image"></div>
                 <div class="resize_handlers top_right_handler" @mousedown="resize_image"></div>
@@ -61,7 +63,6 @@
     export default {
         data: function(){
           return {
-
               current_resizing_image: null,
               image_load_status: null,
               resizer_mouse_status: 11,
@@ -74,7 +75,7 @@
                   4: 'mouse over resizer section + mouseUp',
                   5: 'mouse over resizer section'
               },
-              mouse_over_resizer: false,
+              // mouse_over_resizer: false,
               abcdefg: 0,
               mouse_over_image_resizer: false,
               max_image_width: '799px',
@@ -125,10 +126,7 @@
             iconItalic () {return faItalic},
             saveContent () {return faSave},
             placeholderShow () {
-                console.log('it works placeholderShow')
-                console.log('rich_text: '  + this.rich_text)
                 if (this.rich_text.length != 0){
-                    console.log('this.rich_text.length != 0 is true and rich_text is: ' + this.rich_text)
                     this.showPlaceholderSpan = false
                 } else {
                     this.showPlaceholderSpan = true
@@ -136,32 +134,16 @@
                 return this.showPlaceholderSpan
             },
             reverseRichText () {
-                console.log('reverseRichText')
                 return this.rich_text.split('').reverse().join('')
             }
         },
         mounted: function(){
-            document.onclick = (e) => {
-                console.log('activeElement is: ')
-                console.dir(document.activeElement)
+            document.execCommand("defaultParagraphSeparator", false, "p") // set default paragraph separator to '<p>'
 
-                console.log('reditor is: ')
-                console.dir(this_vc.$refs.reditor)
-
-                console.log('event target is: ')
-                console.dir(e.target)
-
-                if(e.target != this_vc.$refs.reditor){
-                    console.log('its not reditor!')
-                }
-            }
-            document.execCommand("defaultParagraphSeparator", false, "p")
-            tokenCSRF = document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             this_vc = this
-
+            tokenCSRF = document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             imageResizer = document.querySelector('#image_resizer')
 
-            // imgResizerHandlers
 
             imageResizer.onmouseover = ()=>{ console.log('resizer mouseover'); this_vc.mouse_over_resizer = true ; this_vc.resizer_mouse_status = 2}
             imageResizer.onmouseout = ()=>{ this_vc.mouse_over_resizer = false; this_vc.resizer_mouse_status = 0}
@@ -172,7 +154,6 @@
                     imageResizer.classList.add('its_active')
                     imgResizerHandlers.forEach(function(el){ el.classList.remove('inactive') })
                 }
-                // console.log('imageResizer in focus now')
             }
 
             imageResizer.onblur = () => {
@@ -204,76 +185,20 @@
             var imageObserver = new MutationObserver(function(mutations) {
                 mutations.forEach(function(mutation) {
                     if(mutation.addedNodes.length > 0){
-                        console.log(mutation.addedNodes['0'])
                         var imageNode =  mutation.addedNodes['0']
-                        console.log(`imageNode.nodeName is: ${imageNode.nodeName}, imageNode.classList is: ${imageNode.classList}`)
                         if(imageNode.nodeName == 'IMG' && !imageNode.classList.contains('active_img')){
-                            console.dir(mutation)
-                            console.log('IMAGE NODE and attributes: ')
-                            console.dir(imageNode)
-                            console.log('imageNode.imageNode.attributes')
-                            console.dir(imageNode.attributes)
-                            // var image = new Image
                             var image_src = imageNode.attributes.src.value
 
                             imageNode.onload = this_vc.prepare_for_resizing(image_src)
-                            // image.onload = this_vc.prepare_for_resizing(image_src)
 
                             imageNode.addEventListener('load', function(){
-                                console.log('image Node is loadede!!!!!')
-                                console.log('image node is complete: ' + imageNode.complete)
                                 var imgTag = document.querySelector(`img[src='${image_src}']`)
                                 this_vc.set_img_resizer_params(imgTag, 'sleep')
                             }, UIEvent)
-
-                            // image.src = imageNode.attributes.src.value
-                            // console.log(`image is load complete?: ${image.complete}`)
                         }
                     }
                 });
             });
-
-            var resizerObserver = new MutationObserver(function(mutations){
-                mutations.forEach(function(mutation) {
-                    console.log(resizerObserver)
-                    console.dir(mutation)
-                });
-            })
-
-            resizerObserver.observe(
-                imageResizer, {
-                    attributes: true,
-                    attributeOldValue: true
-                }
-            )
-
-
-            // var imageUploadObserver = new MutationObserver(function(mutations) {
-            //     mutations.forEach(function(mutation) {
-            //         if(mutation.addedNodes.length > 0){
-            //             console.log(mutation.addedNodes['0'])
-            //             var imageNode =  mutation.addedNodes['0']
-            //             console.log(`imageNode.nodeName is: ${imageNode.nodeName}, imageNode.classList is: ${imageNode.classList}`)
-            //             if(imageNode.nodeName == 'IMG' && !imageNode.classList.contains('active_img')){
-            //                 console.dir(mutation)
-            //                 console.log('IMAGE NODE and attributes: ')
-            //                 console.dir(imageNode)
-            //                 console.log('imageNode.imageNode.attributes')
-            //                 console.dir(imageNode.attributes)
-            //                 var image = new Image
-            //                 var image_src = imageNode.attributes.src.value
-            //
-            //                 imageNode.onload = this_vc.prepare_for_resizing(image_src)
-            //                 // image.onload = this_vc.prepare_for_resizing(image_src)
-            //
-            //                 // image.src = imageNode.attributes.src.value
-            //                 console.log(`image is load complete?: ${image.complete}`)
-            //             }
-            //         }
-            //     });
-            // });
-
-
 
             imageObserver.observe(
                 document.getElementById('richED'),
@@ -283,22 +208,15 @@
                 }
             );
 
-            // imageUploadObserver.observe(
-            //     document.getElementBy
-            // )
         },
-        watch: {
-            abcdefg: function(){
-                console.log('свойство было обновлено!!!')
-            },
-            current_resizing_image: function(){
-                console.log('current_resized_image было обновлено!!!')
-            }
-        },
+        // watch: {
+        //     abcdefg: function(){
+        //     },
+        //     current_resizing_image: function(){
+        //     }
+        // },
         methods: {
             char_counter: function(e){
-
-                //new code
 
                 var reditor = this_vc.$refs.reditor
 
@@ -408,7 +326,6 @@
                 }
             },
             saveAsPost: function(){
-                // var RichED = document.querySelector('div[id="richED"]')
                 var content = this_vc.$refs.reditor.innerHTML
                 var formData = new FormData()
                 var xhr = new XMLHttpRequest()
@@ -432,7 +349,6 @@
                 var RichED = document.querySelector('div[id="richED"]')
                 var formData = new FormData(document.forms.attachment);
                 var xhr = new XMLHttpRequest()
-                // var token = document.querySelector('meta[name="csrf-token"]').getAttribute('content')
 
                 xhr.open("POST", "/attachments/")
                 xhr.setRequestHeader('X-CSRF-Token', tokenCSRF)
@@ -440,8 +356,6 @@
                 xhr.send(formData)
                 xhr.onreadystatechange = function(){
                     if (xhr.readyState == 4) {
-                        // var canvas = document.getElementById("canvas"); // canvas init
-                        // var ctx = canvas.getContext("2d"); // canvas getContext
 
                         var respText = JSON.parse(xhr.responseText)
                         var fileUrl = respText.file.url
@@ -477,26 +391,13 @@
             },
             getCursorPosition() {
                 console.log(document.getSelection().style)
-                // var ctrl = RichED
-                // var CaretPos = 0
-                // if ( document.getSelection() && document.getSelection() != undefined ) {
-                //     ctrl.focus ()
-                //     var el = document.getSelection().createRange()
-                //     el.moveStart ('character', -ctrl.value.length)
-                //     CaretPos = el.text.length
-                // } else if ( ctrl.selectionStart || ctrl.selectionStart == '0' ) {
-                //     console.log(ctrl)
-                //     CaretPos = ctrl.selectionStart
-                // }
+
                 return 'yaya position'
             },
             seeStyleOnTools () {
-                // var lastParentNode = document.getSelection().anchorNode.parentNode
-                // var tagnamestyle = lastParentNode.tagName.toLowerCase()
-                // var pTagQuantity = document.querySelector('#richED').children.length
+
                 var editableP
                 var reditor = this_vc.$refs.reditor
-                // var editableP = document.querySelector('#richED').firstChild
 
                 if(reditor.hasChildNodes()){
                     editableP = reditor.firstChild
@@ -532,28 +433,16 @@
             },
             setImageAreaProps: function(e){
                 console.log('TARGET WIDTH ' + e.target.naturalWidth + 'TARGET HEIGHT ' + e.target.naturalHeight)
-                // this_vc.active_image.he = e.target.height
-                // this_vc.active_image.wi = e.target.width
-                // var act_img = document.querySelector('p.image_is_here')
-                // act_img.style.width = `${e.target.width}px`
-                // act_img.style.height = `${e.target.height}px`
-                // console.log(`act_img.top: ${act_img.offsetTop}, act_img.left: ${act_img.offsetLeft}`)
+
                 console.log(`e.target.offsetTop: ${e.target.offsetTop}, e.target.offsetLeft: ${e.target.offsetLeft}`)
-                // if(getComputedStyle(e.target).paddingTop === '16px'){
-                //     e.target.style.paddingTop = '0'
-                // }
+
                 this_vc.test_resizer_data.top = `${e.target.offsetTop}px`
                 this_vc.test_resizer_data.left = `${e.target.offsetLeft}px`
                 this_vc.test_resizer_data.height = `${e.target.height - 1}px`
                 this_vc.test_resizer_data.width = `${e.target.width - 1}px`
                 this_vc.test_resizer_data.image.x1_lt = `${parseInt(this_vc.test_resizer_data.left, 10)}px`
                 this_vc.test_resizer_data.image.x2_rt = `${parseInt(this_vc.test_resizer_data.left, 10) + parseInt(this_vc.test_resizer_data.width, 10)}px`
-                // this.test_resizer_data.image.x3_lb = this.this.test_resizer_data.left
-                // this.test_resizer_data.image.x4_rb = this.this.test_resizer_data.left
-                // this.test_resizer_data.image.y1_lt = this.this.test_resizer_data.left
-                // this.test_resizer_data.image.y2_rt = this.this.test_resizer_data.left
-                // getComputedStyle(e.target).paddingTop        // this.test_resizer_data.image.y3_lb = this.this.test_resizer_data.left
-                // this.test_resizer_data.image.y4_rb = this.this.test_resizer_data.left
+
             },
             set_img_resizer_params(img_element, resizer_mode){
                 imgResizerHandlers = document.querySelectorAll('.resize_handlers')
@@ -571,19 +460,7 @@
                 this_vc.test_resizer_data.image.x1_lt = `${parseInt(this_vc.test_resizer_data.left, 10)}px`
                 this_vc.test_resizer_data.image.x2_rt = `${parseInt(this_vc.test_resizer_data.left, 10) + parseInt(this_vc.test_resizer_data.width, 10)}px`
                 this_vc.switch_resizer_mode(resizer_mode)
-                // switch (resizer_mode){
-                //     case 'active':
-                //         imageResizer.classList.remove('sleep')
-                //         imageResizer.classList.add('its_active')
-                //         break
-                //     case 'sleep':
-                //         imageResizer.classList.remove('its_active')
-                //         imageResizer.classList.add('sleep')
-                //         imgResizerHandlers.forEach(function(el){ el.classList.add('inactive')})
-                //         break
-                //     default:
-                //         break
-                // }
+
             },
             toggle_image_resizer_activity: function(e){
                 // if(e.target.)
@@ -617,24 +494,7 @@
                         console.log(`e.target.classList.contains('active_img'): ${e.target.classList.contains('active_img')}`)
                         this_vc.mouseupped_on_image_resizer = false
                     }
-                    // this_vc.mouseupped_on_image_resizer = false
                 }
-
-
-                // if(e.target.id === 'testresize' &&  imageResizer.classList.contains('its_active')){
-                //     imageResizer.classList.remove('its_active')
-                // }
-
-                // if(e.target.id === 'image_resizer' && imageResizer.classList.contains('its_active')){
-                //     console.log()
-                //     imageResizer.classList.remove('its_active')
-                // }else if(e.target.id === 'testresize' &&){
-                //
-                // }
-
-                // if(document.querySelector('#image_resizer').classList.contains('its_active')){
-                //     document.querySelector('#image_resizer').classList.remove('its_active')
-                // }
             },
             activateImageResizer: function(){
                 document.querySelector('#image_resizer').classList.add('its_active')
@@ -677,9 +537,6 @@
                 image.className = 'active_img'
                 console.log('prepare_for_resizing image is complete:  ' + image.complete)
 
-                // var resizableImg = image.cloneNode(true)
-                // resizableImg.className += ' res_img'
-                // resizableImg.draggable = false
                 image.className += ' res_img'
                 image.className += ' inserted_image'
                 image.style.verticalAlign = 'top'
@@ -688,58 +545,14 @@
                 if(getComputedStyle(image).paddingTop === '16px'){
                     image.style.paddingTop = '0'
                 }
-                // image.style.marginTop = '-16px'
-                // image.draggable = false - NEED TO ADD LATER
 
-                // image.onmouseover = function(){
-                //     this_vc.mouse_over_resizer = true
-                // }
-
-                // image.onmouseover = () => {
-                //     this_vc.mouse_over_resizer = true
-                // }
-
-                // OLD VERSION:
-                // image.onmousedown = function(e){
-                //     this_vc.setImageAreaProps(e)
-                //     this_vc.
-                //     this_vc.toggle_image_resizer_activity(e)
-                    // console.log('image.onmousedown')
-                    // console.dir(document.getSelection())
-                    // this_vc.activateImageResizer(e)
-                // }
-                // NEW VERSION:
-                // this_vc.set_img_resizer_params(image, 'sleep')
                 image.onmousedown = function(e){
                     this_vc.setImageAreaProps(e)
-                    // this_vc.
-                    // this_vc.toggle_image_resizer_activity(e)
                     console.log('image.onload is complete:  ' + image.complete)
                     console.log('image.onmousedown')
                     console.dir(document.getSelection())
                     this_vc.activateImageResizer(e)
                 }
-
-
-
-                // resizableImg.onmousedown = function(e){
-                //     this_vc.setImageAreaProps(e)
-                //     this_vc.toggle_image_resizer_activity(e)
-                //     this_vc.activateImageResizer(e)
-                // }
-
-                // resizableImg.addEventListener('onclick',)
-
-                // resizableImg.onclick.capture = function(){
-                //     toggle_active_image_resizer
-                // }
-
-                // resizableImg.onmousemove = function(e){
-                    // console.log(` moved!!`)
-                // }
-
-                // var resrg = document.querySelector('p.image_is_here')
-                // resrg.appendChild(resizableImg)
             },
             resize_image: function(e){
                 this_vc.mouse_down_on_IRH = true
@@ -881,48 +694,7 @@
         visibility: hidden;
     }
 
-    /*.writer{*/
-        /*margin: 0;*/
-        /*padding-top: 16px;*/
-        /*padding-left: 14px;*/
-        /*z-index: 2;*/
-        /**/
-        /*opacity: 1;*/
-
-        /*&:empty{*/
-            /*background: #B00100;*/
-            /*color: none;*/
-            /*<!--z-index: -20;-->*/
-            /*opacity: 0;*/
-            /*background: none;*/
-
-        /*}*/
-        /*& + span {*/
-            /**/
-        /*}*/
-
-        /*&:before{*/
-            /**/
-        /*}*/
-    /**/
-        /*&:after{*/
-            /*content: 'Пиши здесь';*/
-            /*display: block;*/
-        /*}*/
-    /*}*/
-
-    /*.writer:empty + span {*/
-        /*opacity: 1;*/
-    /*}*/
-
-    /*.writer + span {*/
-        /*opacity: 0;*/
-    /*}*/
-
-
     .placeholderSpan{
-        /*width: 100%;*/
-        /*height: 100%;*/
         display: block;
         pointer-events: none;
         font-size: 16px;
@@ -946,27 +718,21 @@
     #richED{
         position: relative;
         box-sizing: content-box;
-        /*height: 400px;*/
         min-height: 399px;
         width: 800px;
         height: auto;
         overflow: hidden;
-        /*overflow-x: auto;*/
-        /*overflow-y: visible;*/
         border: 0;
         box-shadow: 0 1px 3px rgba(0,0,0,0.12),0 1px 1px 1px rgba(0,0,0,0.16);
         background: white;
         outline: none;
         padding: 0px 16px 16px;
-        /*z-index: 2;*/
         font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
         & :only-child{
             margin: 0;
             padding-top: 16px;
-            /*padding-left: 14px;*/
             z-index: 2;
-            /*background: red;*/
         }
 
         & :only-child:after{
@@ -978,56 +744,19 @@
             content: 'ТАЙПХИР!';
             position: absolute;
             color: rgba(28, 28, 28, 0.45);
-            /*top: 60px;*/
-            /*<!--left: -15px;-->*/
         }
 
-        /*.writer:before{*/
-            /*content: 'u lala!'*/
-        /*}*/
     }
-
-    /*#richED {*/
-    /**/
-    /**/
-    /*}*/
 
     .resizableImg{
         resize: both;
         overflow: hidden;
     }
 
-    /*p{*/
-        /*margin: 0 0 10px;*/
-        /*width: 100%;*/
-        /*!*height: 0;*!*/
-    /*}*/
-
-    /*img{*/
-        /*resize: both;*/
-    /*}*/
-
     body{
-        /*font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;*/
-        /*overflow-x: hidden;*/
 
-        /*margin: 0!important;*/
-        /*padding: 0!important;*/
     }
 
-    /*#richEditor{*/
-        /*overflow-x: hidden;*/
-        /*width: 500px;*/
-        /*height: 500px;*/
-
-        /*document{*/
-            /*overflow-x: hidden;*/
-        /*}*/
-
-        /*body{*/
-            /*overflow-x: hidden;*/
-        /*}*/
-    /*}*/
 
     iframe{
 
@@ -1038,12 +767,7 @@
     }
 
     .edit-buttons{
-        /*background: white;*/
         height: 40px;
-        /*display: flex;*/
-        /*justify-content: space-between;*/
-        /*float: left;*/
-        /*border:  2px solid #8a8a8a;*/
         box-shadow: 0 1px 3px rgba(0,0,0,0.12),0 1px 1px 1px rgba(0,0,0,0.16);
     }
 
@@ -1052,10 +776,7 @@
         height: 25px;
         border: none;
         outline: none;
-        /*margin: 0 !important;*/
         float: left;
-        /*margin-left: 3px;*/
-        /*margin-right: 3px;*/
         &:hover{
             background: transparent;
         }
@@ -1076,18 +797,12 @@
     }
 
     .edit-buttons-group{
-        /*display: flex;*/
-        /*justify-content: space-between;*/
-        /*width: 77px;*/
-        /*height: 25px;*/
     }
 
     .iconBox{
-        /*margin: 0px 0px 0px 0.75px;*/
     }
 
     #imageEditButton{
-        /*padding: 0px 0px 0px 0.75px;*/
     }
 
     .not-a-buttons-group{

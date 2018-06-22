@@ -30,7 +30,7 @@
 
             <div id="richED" ref="reditor"  @mouseup="seeStyleOnTools" @keydown.enter="addBR"  @keydown.delete="prevent_p_deletion" contenteditable="true" @mouseover="mouseOnEditor" @mouseout="mouseOffEditor" @click="makeAreaActive"  @keyup.delete="before_deletion" @keydown="char_counter" @keyup="char_counter">
 
-                <p class="writer"></p>
+                <p class="writer" :tabindex="1000"></p>
             </div>
 
             <div id='image_resizer' class="image_resizer" :style="test_resizer_data" tabindex="105">
@@ -58,23 +58,12 @@
     import { fabric } from 'fabric'
 
     var tag_names = ['b', 'i']
-    var this_vc, tokenCSRF, imageResizer, imgResizerHandlers
+    var this_vc, tokenCSRF, imageResizer, imgResizerHandlers, currentResizingImage
 
     export default {
         data: function(){
           return {
-              current_resizing_image: null,
-              image_load_status: null,
-              resizer_mouse_status: 11,
-              resizer_mouse_statuses: {
-                  11: 'none',
-                  0: 'mouse out resizer section',
-                  1: 'mouse out resizer section + mouseDown',
-                  2: 'mouse over resizer section',
-                  3: 'mouse over resizer section + mouseDown',
-                  4: 'mouse over resizer section + mouseUp',
-                  5: 'mouse over resizer section'
-              },
+              p_tab_index_int: 1000,
               // mouse_over_resizer: false,
               abcdefg: 0,
               mouse_over_image_resizer: false,
@@ -99,6 +88,7 @@
                   left: '400px',
                   maxWidth: '798px',
                   image: {
+                      url: '',
                       x1_old: '',
                       x1_lt: '',
                       x2_rt: '',
@@ -144,56 +134,42 @@
             tokenCSRF = document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             imageResizer = document.querySelector('#image_resizer')
 
-
-            imageResizer.onmouseover = ()=>{ console.log('resizer mouseover'); this_vc.mouse_over_resizer = true ; this_vc.resizer_mouse_status = 2}
-            imageResizer.onmouseout = ()=>{ this_vc.mouse_over_resizer = false; this_vc.resizer_mouse_status = 0}
-            imageResizer.onfocus = ()=>{
-
-                if(imageResizer.classList.contains('sleep')){
-                    imageResizer.classList.remove('sleep')
-                    imageResizer.classList.add('its_active')
-                    imgResizerHandlers.forEach(function(el){ el.classList.remove('inactive') })
-                }
+            imageResizer.onfocus = () => {
+                this_vc.switch_resizer_mode('active')
             }
 
-            imageResizer.onblur = () => {
-                if(imageResizer.classList.contains('its_active')){
-                    imageResizer.classList.remove('its_active')
-                    imageResizer.classList.add('sleep')
-                    imgResizerHandlers.forEach(function(el){ el.classList.add('inactive') })
-                }
-            }
-            imageResizer.onmousedown = () => {
-                if(imageResizer.classList.contains('sleep')){
-                    imageResizer.classList.remove('sleep')
-                    imageResizer.classList.add('its_active')
-                    imgResizerHandlers.forEach(function(el){ el.classList.remove('inactive') })
-                }
-                this_vc.resizer_mouse_status = 3
-                // case this_vc.resizer_mouse_status
-                // when 2
-                //     this_vc.resizer_mouse_status = 3
-                // when 0
-            }
-
-            imageResizer.onmouseup = () => {
-                if(this_vc.resizer_mouse_status == 3){
-                    this_vc.resizer_mouse_status = 4
+            imageResizer.onblur = (e) => {
+                if(e.relatedTarget){
+                    if(e.relatedTarget.nodeName != 'IMG'){
+                        this_vc.switch_resizer_mode()
+                    }
+                }else{
+                    this_vc.switch_resizer_mode()
                 }
             }
 
             var imageObserver = new MutationObserver(function(mutations) {
                 mutations.forEach(function(mutation) {
+
                     if(mutation.addedNodes.length > 0){
                         var imageNode =  mutation.addedNodes['0']
+
+                        if(imageNode.nodeName == 'P'){
+                            imageNode.setAttribute('tabindex', `${++this_vc.p_tab_index_int}`)
+                        }
+
                         if(imageNode.nodeName == 'IMG' && !imageNode.classList.contains('active_img')){
-                            var image_src = imageNode.attributes.src.value
-
-                            imageNode.onload = this_vc.prepare_for_resizing(image_src)
-
-                            imageNode.addEventListener('load', function(){
-                                var imgTag = document.querySelector(`img[src='${image_src}']`)
-                                this_vc.set_img_resizer_params(imgTag, 'sleep')
+                            imageNode.addEventListener('load', () => {
+                                this_vc.new_prepare_for_resizing(imageNode)
+                                let imgsLength = this_vc.$refs.reditor.querySelectorAll('img').length
+                                imageNode.setAttribute('tabindex', `${110 + imgsLength}`)
+                                imageNode.onfocus = e => {
+                                    currentResizingImage = imageNode
+                                    this_vc.set_img_resizer_params(imageNode, 'active')
+                                }
+                                imageNode.onblur = e => {
+                                    this_vc.switch_resizer_mode()
+                                }
                             }, UIEvent)
                         }
                     }
@@ -209,12 +185,6 @@
             );
 
         },
-        // watch: {
-        //     abcdefg: function(){
-        //     },
-        //     current_resizing_image: function(){
-        //     }
-        // },
         methods: {
             char_counter: function(e){
 
@@ -232,11 +202,21 @@
                 }
 
             },
+            new_prepare_for_resizing(resized_img){
+                resized_img.className = 'active_img'
+                resized_img.className += ' res_img'
+                resized_img.className += ' inserted_image'
+
+                resized_img.style.verticalAlign = 'top'
+                resized_img.style.maxWidth = this_vc.max_image_width
+                resized_img.style.display = 'block'
+                resized_img.style.outline = 'none'
+
+                if(getComputedStyle(resized_img).paddingTop === '16px'){ resized_img.style.paddingTop = '0' }
+            },
             addBR: function(e){
                 if(e.target.children.length === 1){
-                    console.log('p tag quantity is 1')
                     if(!e.target.lastChild.hasChildNodes()){
-                        console.log('p tag have dont have children')
                         var brTag = document.createElement('br')
                         e.target.lastChild.appendChild(brTag)
                     }
@@ -312,12 +292,9 @@
                     var  x_old =  isNaN(parseInt(this_vc.test_resizer_data.image.x1_old)) ? x_start : parseInt(this_vc.test_resizer_data.image.x1_old, 10)
                     var x_new = this_vc.cursor.position.x // это не нужно наверное
                     var width_old = parseInt(this_vc.test_resizer_data.width) // это тоже не нужно наверное
-                    var resizedImage = document.querySelector('img.active_img')
+                    var resizedImage = currentResizingImage
 
                     this_vc.test_resizer_data.width =  resizeFromLeftSide ? `${width_old - (x_new - x_old)}px` : `${width_old + (x_new - x_old)}px`
-                    // if(this_vc.test_resizer_data.width >= 801){
-                    //     this_vc.test_resizer_data.width = 600
-                    // }
                     resizedImage.style.width = `${parseInt(this_vc.test_resizer_data.width) + 1}px`
 
                     this_vc.test_resizer_data.height = `${parseInt(getComputedStyle(resizedImage).height) - 1}px`
@@ -346,7 +323,6 @@
                 document.querySelector('input[name="file"]').click()
             },
             imgUploadAndInsert: function (e) {
-                var RichED = document.querySelector('div[id="richED"]')
                 var formData = new FormData(document.forms.attachment);
                 var xhr = new XMLHttpRequest()
 
@@ -356,46 +332,19 @@
                 xhr.send(formData)
                 xhr.onreadystatechange = function(){
                     if (xhr.readyState == 4) {
-
                         var respText = JSON.parse(xhr.responseText)
                         var fileUrl = respText.file.url
                         document.execCommand('insertImage', false, fileUrl)
-                        console.log(fileUrl)
-
                     }
                 }
             },
             execCmd: function(command) {
-                // var position = this.getCursorPosition()
-                // console.log('execCmd calls and cursor pos = ' + position)
-                // var tagnamestyle = document.getSelection().anchorNode.parentNode.tagName
-                console.log('execCmd calls')
                 document.execCommand(command, false, null)
-            },
-            anchorizeImg: function(){
-
             },
             tokenCSRF () { // make it variable
                 return document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
-            returnFocusBack () {
-                console.log('it returned!')
-
-                richEditor.focus()
-                if(richEditor.onfocus == true){
-                    console.log('not in focus!!')
-                    // co
-                }else{
-                    richEditor.focus()
-                }
-            },
-            getCursorPosition() {
-                console.log(document.getSelection().style)
-
-                return 'yaya position'
-            },
             seeStyleOnTools () {
-
                 var editableP
                 var reditor = this_vc.$refs.reditor
 
@@ -432,94 +381,28 @@
                 return node_names
             },
             setImageAreaProps: function(e){
-                console.log('TARGET WIDTH ' + e.target.naturalWidth + 'TARGET HEIGHT ' + e.target.naturalHeight)
-
-                console.log(`e.target.offsetTop: ${e.target.offsetTop}, e.target.offsetLeft: ${e.target.offsetLeft}`)
-
-                this_vc.test_resizer_data.top = `${e.target.offsetTop}px`
-                this_vc.test_resizer_data.left = `${e.target.offsetLeft}px`
-                this_vc.test_resizer_data.height = `${e.target.height - 1}px`
-                this_vc.test_resizer_data.width = `${e.target.width - 1}px`
+                this_vc.set_resizer_data(e.target)
+            },
+            set_resizer_data(data_source_el){
+                this_vc.test_resizer_data.top = `${data_source_el.offsetTop}px`
+                this_vc.test_resizer_data.left = `${data_source_el.offsetLeft}px`
+                this_vc.test_resizer_data.height = `${data_source_el.height - 1}px`
+                this_vc.test_resizer_data.width = `${data_source_el.width - 1}px`
                 this_vc.test_resizer_data.image.x1_lt = `${parseInt(this_vc.test_resizer_data.left, 10)}px`
                 this_vc.test_resizer_data.image.x2_rt = `${parseInt(this_vc.test_resizer_data.left, 10) + parseInt(this_vc.test_resizer_data.width, 10)}px`
-
             },
             set_img_resizer_params(img_element, resizer_mode){
                 imgResizerHandlers = document.querySelectorAll('.resize_handlers')
-                console.log(`img_element.offsetTop = ${img_element.offsetTop}, img_element.offsetLeft = ${img_element.offsetLeft}, clientWidth: ${getComputedStyle(img_element).clientWidth}, offsetWidth: ${getComputedStyle(img_element).offsetWidth}`)
-                console.log(`!!!! img_element is : ${img_element}`)
-                console.dir(img_element)
-                console.log('img_wlwmwnr styles: ')
-                console.log(getComputedStyle(img_element))
-                console.log('inlineSize: ')
-                console.log(getComputedStyle(img_element).inlineSize)
-                this_vc.test_resizer_data.top = `${img_element.offsetTop}px`
-                this_vc.test_resizer_data.left = `${img_element.offsetLeft}px`
-                this_vc.test_resizer_data.height = `${img_element.height - 1}px`
-                this_vc.test_resizer_data.width = `${img_element.width - 1}px`
-                this_vc.test_resizer_data.image.x1_lt = `${parseInt(this_vc.test_resizer_data.left, 10)}px`
-                this_vc.test_resizer_data.image.x2_rt = `${parseInt(this_vc.test_resizer_data.left, 10) + parseInt(this_vc.test_resizer_data.width, 10)}px`
+
+                this_vc.set_resizer_data(img_element)
                 this_vc.switch_resizer_mode(resizer_mode)
-
             },
-            toggle_image_resizer_activity: function(e){
-                // if(e.target.)
-                console.log(`mouse_over_image_resizer: ${this_vc.mouse_over_image_resizer}`)
-                console.log('e IS')
-                console.dir(e)
-                console.log('event.target')
-                console.dir(e.target)
-                console.log('event.currentTarget')
-                console.dir(e.currentTarget)
-                console.log('toggle_image_resizer_activity')
-                console.log(imageResizer.style.display)
-                console.log(imageResizer.display)
-                console.log(imageResizer.hidden)
-                console.log(getComputedStyle(imageResizer).display)
-                console.log(`e.target.id= ${e.target.id}`)
-                console.log(`imageResizer.classList.contains('its_active'): ${imageResizer.classList.contains('its_active')}`)
-
-                if(e.target.classList.contains('active_img')){
-                    console.log(`e.target.classList.contains('active_img'): ${e.target.classList.contains('active_img')}`)
-                    imageResizer.classList.add('its_active')
-
-                    // e.stopPropagation
-                }else if(e.target.id === 'testresize' &&  imageResizer.classList.contains('its_active') && this_vc.mouse_over_image_resizer !== true && this_vc.mouseupped_on_image_resizer === false){
-                    console.log(`e.target.id === 'testresize': ${e.target.id === 'testresize'},imageResizer.classList.contains('its_active'): ${imageResizer.classList.contains('its_active')} `)
-                    imageResizer.classList.remove('its_active')
-                }else {
-                    console.log('last ELSE')
-                    console.log(`e.target.id === 'testresize': ${e.target.id === 'testresize'},imageResizer.classList.contains('its_active'): ${imageResizer.classList.contains('its_active')} `)
-                    if(!e.target.classList.contains('active_img')){
-                        console.log(`e.target.classList.contains('active_img'): ${e.target.classList.contains('active_img')}`)
-                        this_vc.mouseupped_on_image_resizer = false
-                    }
-                }
-            },
-            activateImageResizer: function(){
-                document.querySelector('#image_resizer').classList.add('its_active')
-                console.log('active element is: ')
-                console.dir(document.activeElement)
-                document.querySelector('#richED').blur()
-                console.log('active element is: ')
-                console.dir(document.activeElement)
-                document.getSelection().removeAllRanges()
-            },
-            unactivate_image_resizer: function(e){
-                console.log('target:')
-                console.log(e.target)
-                console.log('currentTarget')
-                console.dir(e.currentTarget)
-                console.log(`evaentPhase: ${e.eventPhase }`)
-                if(document.querySelector('#image_resizer').classList.contains('its_active')){
-                    document.querySelector('#image_resizer').classList.remove('its_active')
-                }
-            },
-            switch_resizer_mode(mode){
+            switch_resizer_mode(mode = 'default'){
                 switch (mode){
                     case 'active':
                         imageResizer.classList.remove('sleep')
                         imageResizer.classList.add('its_active')
+                        imgResizerHandlers.forEach(function(el){ el.classList.remove('inactive')})
                         break
                     case 'sleep':
                         imageResizer.classList.remove('its_active')
@@ -527,31 +410,16 @@
                         imgResizerHandlers.forEach(function(el){ el.classList.add('inactive')})
                         break
                     default:
+                        if(imageResizer.classList.contains('sleep')){
+                            imageResizer.classList.remove('sleep')
+                            imageResizer.classList.add('its_active')
+                            imgResizerHandlers.forEach(function(el){ el.classList.remove('inactive') })
+                        } else {
+                            imageResizer.classList.remove('its_active')
+                            imageResizer.classList.add('sleep')
+                            imgResizerHandlers.forEach(function(el){ el.classList.add('inactive') })
+                        }
                         break
-                }
-            },
-            prepare_for_resizing(fileUrl){
-
-
-                var image = document.querySelector(`img[src='${fileUrl}']`)
-                image.className = 'active_img'
-                console.log('prepare_for_resizing image is complete:  ' + image.complete)
-
-                image.className += ' res_img'
-                image.className += ' inserted_image'
-                image.style.verticalAlign = 'top'
-                image.style.maxWidth = this_vc.max_image_width
-                image.style.display = 'block'
-                if(getComputedStyle(image).paddingTop === '16px'){
-                    image.style.paddingTop = '0'
-                }
-
-                image.onmousedown = function(e){
-                    this_vc.setImageAreaProps(e)
-                    console.log('image.onload is complete:  ' + image.complete)
-                    console.log('image.onmousedown')
-                    console.dir(document.getSelection())
-                    this_vc.activateImageResizer(e)
                 }
             },
             resize_image: function(e){
@@ -815,6 +683,15 @@
 
     .res_img{
         object-fit: contain;
+
+        &:focus{
+            outline: none;
+            user-select: none;
+        }
+    }
+
+    .writer{
+        outline: none;
     }
 
 </style>

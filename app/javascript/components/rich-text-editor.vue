@@ -13,7 +13,7 @@
                     <font-awesome-icon :icon="iconItalic"  class="iconBox"></font-awesome-icon>
                 </button>
 
-                <button class="edit-button" id="imageEditButton" @click="clickInputField" >
+                <button class="edit-button" id="imageEditButton" @click="click_on_input_field" >
                     <font-awesome-icon :icon="iconImage" class="iconBox"></font-awesome-icon>
                 </button>
             </div>
@@ -23,27 +23,27 @@
         </div>
 
         <form action="/attachments/" method="post" contenteditable="false" enctype="multipart/form-data" name="attachment">
-            <input @change="imgUploadAndInsert" type="file" name="file" accept="image/*"  hidden/>
+            <input @change="insert_image" type="file" name="file" accept="image/*"  hidden/>
         </form>
 
-        <div class="scoo_pee_dee_poo" style="height: 1000px; width: 1000px; border: 1px solid red; position: relative;" @mousemove="saveCoordinates" @mouseup="stop_resize_image" id="testresize">
+        <div class="scoo_pee_dee_poo" style="height: 1000px; width: 1000px; border: 1px solid red; position: relative;" @mousemove="save_coordinates" @mouseup="stop_resize_image" id="editable_area">
 
-            <div id="richED" ref="reditor"  @mouseup="seeStyleOnTools" @keydown.enter="addBR"  @keydown.delete="prevent_p_deletion" contenteditable="true" @mouseover="mouseOnEditor" @mouseout="mouseOffEditor" @click="makeAreaActive"  @keyup.delete="before_deletion" @keydown="char_counter" @keyup="char_counter">
+            <div id="richED" ref="reditor"  @mouseup="show_formatting_styles" @keydown.enter="add_br"  @keydown.delete="prevent_p_deletion" contenteditable="true" @mouseover="mouse_on_editor = true" @mouseout="mouse_on_editor = false" @click="activate_area"  @keyup.delete="before_deletion">
 
-                <p class="writer" :tabindex="1000"></p>
+                <p class="writer" :tabindex="magic_numbers.p_tab_index"></p>
             </div>
 
-            <div id='image_resizer' class="image_resizer" :style="test_resizer_data" tabindex="105">
-                <div class="resize_handlers top_left_handler" @mousedown="resize_image"></div>
-                <div class="resize_handlers top_right_handler" @mousedown="resize_image"></div>
-                <div class="resize_handlers down_left_handler" @mousedown="resize_image"></div>
-                <div class="resize_handlers down_right_handler" @mousedown="resize_image"></div>
+            <div id='image_resizer' class="image_resizer" :style="resizer_data" tabindex="105">
+                <div class="resize_handlers top_left_handler" @mousedown="start_resize_image"></div>
+                <div class="resize_handlers top_right_handler" @mousedown="start_resize_image"></div>
+                <div class="resize_handlers down_left_handler" @mousedown="start_resize_image"></div>
+                <div class="resize_handlers down_right_handler" @mousedown="start_resize_image"></div>
             </div>
         </div>
 
 
         <div class="saveAndPublic">
-            <div class="saveContentAsPost" @click="saveAsPost">
+            <div class="saveContentAsPost" @click="publish_content">
                  <font-awesome-icon :icon="saveContent"></font-awesome-icon>
             </div>
         </div>
@@ -58,29 +58,26 @@
     import { fabric } from 'fabric'
 
     var tag_names = ['b', 'i']
-    var this_vc, tokenCSRF, imageResizer, imgResizerHandlers, currentResizingImage
+    var this_vc,
+        token_csrf,
+        image_resizer,
+        resizer_handlers,
+        current_resizable_img,
+        editable_area;
 
     export default {
         data: function(){
           return {
-              p_tab_index_int: 1000,
-              // mouse_over_resizer: false,
-              abcdefg: 0,
-              mouse_over_image_resizer: false,
-              max_image_width: '799px',
-              active_image: {
-                  url:'',
-                  max_width: 0
+              magic_numbers: {
+                  p_tab_index: 1000,
+                  img_tab_index: 100
               },
-              mouseupped_on_image_resizer: false,
-              mouse_down_on_IRH: false,
+              max_image_width: '799px',
+              mouse_down_on_resize_handler: false,
               mouse_on_editor: false,
-              hidePlaceholderSpan: false,
-              rich_text: '',
-              rich_text_count: 0,
               width: 0,
               height: 0,
-              test_resizer_data: {
+              resizer_data: {
                   handler: '',
                   width: '300px',
                   height: '300px',
@@ -88,16 +85,9 @@
                   left: '400px',
                   maxWidth: '798px',
                   image: {
-                      url: '',
                       x1_old: '',
                       x1_lt: '',
-                      x2_rt: '',
-                      x3_lb: '',
-                      x4_rb: '',
-                      y1_lt: '',
-                      y2_rt: '',
-                      y3_lb: '',
-                      y4_rb: ''
+                      x2_rt: ''
                   }
               },
               cursor:{
@@ -115,30 +105,21 @@
             iconBold () {return faBold},
             iconItalic () {return faItalic},
             saveContent () {return faSave},
-            placeholderShow () {
-                if (this.rich_text.length != 0){
-                    this.showPlaceholderSpan = false
-                } else {
-                    this.showPlaceholderSpan = true
-                }
-                return this.showPlaceholderSpan
-            },
-            reverseRichText () {
-                return this.rich_text.split('').reverse().join('')
-            }
         },
         mounted: function(){
             document.execCommand("defaultParagraphSeparator", false, "p") // set default paragraph separator to '<p>'
 
             this_vc = this
-            tokenCSRF = document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            imageResizer = document.querySelector('#image_resizer')
+            token_csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            image_resizer = document.querySelector('#image_resizer')
+            resizer_handlers = document.querySelectorAll('.resize_handlers')
+            editable_area = document.querySelector('#editable_area')
 
-            imageResizer.onfocus = () => {
+            image_resizer.onfocus = () => {
                 this_vc.switch_resizer_mode('active')
             }
 
-            imageResizer.onblur = (e) => {
+            image_resizer.onblur = (e) => {
                 if(e.relatedTarget){
                     if(e.relatedTarget.nodeName != 'IMG'){
                         this_vc.switch_resizer_mode()
@@ -155,16 +136,18 @@
                         var imageNode =  mutation.addedNodes['0']
 
                         if(imageNode.nodeName == 'P'){
-                            imageNode.setAttribute('tabindex', `${++this_vc.p_tab_index_int}`)
+                            imageNode.setAttribute('tabindex', `${++this_vc.magic_numbers.p_tab_index}`)
                         }
 
                         if(imageNode.nodeName == 'IMG' && !imageNode.classList.contains('active_img')){
                             imageNode.addEventListener('load', () => {
-                                this_vc.new_prepare_for_resizing(imageNode)
+
+                                this_vc.prepare_for_resizing(imageNode)
                                 let imgsLength = this_vc.$refs.reditor.querySelectorAll('img').length
-                                imageNode.setAttribute('tabindex', `${110 + imgsLength}`)
+                                imageNode.setAttribute('tabindex', `${this_vc.magic_numbers.img_tab_index + imgsLength}`)
+
                                 imageNode.onfocus = e => {
-                                    currentResizingImage = imageNode
+                                    current_resizable_img = imageNode
                                     this_vc.set_img_resizer_params(imageNode, 'active')
                                 }
                                 imageNode.onblur = e => {
@@ -186,23 +169,7 @@
 
         },
         methods: {
-            char_counter: function(e){
-
-                var reditor = this_vc.$refs.reditor
-
-                if(reditor.hasChildNodes()){
-
-                    var presumablyEditableP = reditor.lastChild
-
-                    if(reditor.lastChild.nodeType !== Node.TEXT_NODE){
-                        if(presumablyEditableP){
-                            this.rich_text_count = presumablyEditableP.innerText.length
-                        }
-                    }
-                }
-
-            },
-            new_prepare_for_resizing(resized_img){
+            prepare_for_resizing(resized_img){
                 resized_img.className = 'active_img'
                 resized_img.className += ' res_img'
                 resized_img.className += ' inserted_image'
@@ -214,7 +181,7 @@
 
                 if(getComputedStyle(resized_img).paddingTop === '16px'){ resized_img.style.paddingTop = '0' }
             },
-            addBR: function(e){
+            add_br: function(e){
                 if(e.target.children.length === 1){
                     if(!e.target.lastChild.hasChildNodes()){
                         var brTag = document.createElement('br')
@@ -263,7 +230,7 @@
                 }
 
             },
-            makeAreaActive: function(){
+            activate_area: function(){
                 var docArea = this_vc.$refs.reditor.firstChild
                 var p_tag_quantity = this_vc.$refs.reditor.children.length
 
@@ -271,44 +238,34 @@
                     docArea.focus()
                 }
             },
-            mouseOnEditor: function(){
-                this.mouse_on_editor = true
-            },
-            mouseOffEditor: function(){
-                this.mouse_on_editor = false
-            },
-            saveCoordinates: function(e){
-                if(this_vc.mouse_down_on_IRH){
+            save_coordinates(e){
+                if(this_vc.mouse_down_on_resize_handler){
 
-                    var testResizeDiv = document.getElementById('testresize');
-                    this_vc.cursor.position.x = e.clientX - testResizeDiv.offsetLeft
-                    this_vc.cursor.position.y = e.clientY - testResizeDiv.offsetTop
+                    this_vc.cursor.position.x = e.clientX - editable_area.offsetLeft
+                    this_vc.cursor.position.y = e.clientY - editable_area.offsetTop
 
-                    var resizeFromLeftSide = this_vc.test_resizer_data.handler.search('left') != -1
+                    let resize_from_left_side = this_vc.resizer_data.handler.search('left') != -1
 
-                     ++this_vc.abcdefg
+                    let x_start = parseInt(resize_from_left_side ? this_vc.resizer_data.left : this_vc.resizer_data.image.x2_rt)
+                    let  x_old =  isNaN(parseInt(this_vc.resizer_data.image.x1_old)) ? x_start : parseInt(this_vc.resizer_data.image.x1_old, 10)
+                    let x_new = this_vc.cursor.position.x // это не нужно наверное
+                    let width_old = parseInt(this_vc.resizer_data.width) // это тоже не нужно наверное
 
-                    var x_start = parseInt(resizeFromLeftSide ? this_vc.test_resizer_data.left : this_vc.test_resizer_data.image.x2_rt)
-                    var  x_old =  isNaN(parseInt(this_vc.test_resizer_data.image.x1_old)) ? x_start : parseInt(this_vc.test_resizer_data.image.x1_old, 10)
-                    var x_new = this_vc.cursor.position.x // это не нужно наверное
-                    var width_old = parseInt(this_vc.test_resizer_data.width) // это тоже не нужно наверное
-                    var resizedImage = currentResizingImage
+                    this_vc.resizer_data.width =  resize_from_left_side ? `${width_old - (x_new - x_old)}px` : `${width_old + (x_new - x_old)}px`
+                    current_resizable_img.style.width = `${parseInt(this_vc.resizer_data.width) + 1}px`
 
-                    this_vc.test_resizer_data.width =  resizeFromLeftSide ? `${width_old - (x_new - x_old)}px` : `${width_old + (x_new - x_old)}px`
-                    resizedImage.style.width = `${parseInt(this_vc.test_resizer_data.width) + 1}px`
-
-                    this_vc.test_resizer_data.height = `${parseInt(getComputedStyle(resizedImage).height) - 1}px`
-                    this_vc.test_resizer_data.image.x1_old = `${x_new}px`
-                    this_vc.test_resizer_data.image.x2_rt = `${parseInt(this_vc.test_resizer_data.left) + parseInt(this_vc.test_resizer_data.width)}px`
+                    this_vc.resizer_data.height = `${parseInt(getComputedStyle(current_resizable_img).height) - 1}px`
+                    this_vc.resizer_data.image.x1_old = `${x_new}px`
+                    this_vc.resizer_data.image.x2_rt = `${parseInt(this_vc.resizer_data.left) + parseInt(this_vc.resizer_data.width)}px`
                 }
             },
-            saveAsPost: function(){
-                var content = this_vc.$refs.reditor.innerHTML
-                var formData = new FormData()
+            publish_content: function(){
+                let content = this_vc.$refs.reditor.innerHTML
+                let formData = new FormData()
                 var xhr = new XMLHttpRequest()
 
                 xhr.open("POST", "/posts/")
-                xhr.setRequestHeader('X-CSRF-Token', tokenCSRF)
+                xhr.setRequestHeader('X-CSRF-Token', token_csrf)
 
                 formData.append("content", content)
                 xhr.send(formData)
@@ -319,15 +276,15 @@
                     }
                 }
             },
-            clickInputField: function() {
+            click_on_input_field: function() {
                 document.querySelector('input[name="file"]').click()
             },
-            imgUploadAndInsert: function (e) {
+            insert_image(){
                 var formData = new FormData(document.forms.attachment);
                 var xhr = new XMLHttpRequest()
 
                 xhr.open("POST", "/attachments/")
-                xhr.setRequestHeader('X-CSRF-Token', tokenCSRF)
+                xhr.setRequestHeader('X-CSRF-Token', token_csrf)
 
                 xhr.send(formData)
                 xhr.onreadystatechange = function(){
@@ -341,17 +298,14 @@
             execCmd: function(command) {
                 document.execCommand(command, false, null)
             },
-            tokenCSRF () { // make it variable
-                return document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            seeStyleOnTools () {
+            show_formatting_styles () {
                 var editableP
                 var reditor = this_vc.$refs.reditor
 
                 if(reditor.hasChildNodes()){
                     editableP = reditor.firstChild
 
-                    var all_nodes_names = this_vc.returnNotDivLastParentNodesNames(document.getSelection().anchorNode)
+                    var all_nodes_names = this_vc.last_parent_node_names(document.getSelection().anchorNode)
 
                     if(all_nodes_names.length == 0){
                         for(var prop in this.buttons_activity) {
@@ -368,7 +322,7 @@
                     }
                 }
             },
-            returnNotDivLastParentNodesNames (node) {
+            last_parent_node_names (node) {
                 var node_names = []
                 if(node != null){
                     var i = (node.tagName != undefined) ? node : node.parentNode
@@ -380,59 +334,54 @@
                 }
                 return node_names
             },
-            setImageAreaProps: function(e){
-                this_vc.set_resizer_data(e.target)
-            },
             set_resizer_data(data_source_el){
-                this_vc.test_resizer_data.top = `${data_source_el.offsetTop}px`
-                this_vc.test_resizer_data.left = `${data_source_el.offsetLeft}px`
-                this_vc.test_resizer_data.height = `${data_source_el.height - 1}px`
-                this_vc.test_resizer_data.width = `${data_source_el.width - 1}px`
-                this_vc.test_resizer_data.image.x1_lt = `${parseInt(this_vc.test_resizer_data.left, 10)}px`
-                this_vc.test_resizer_data.image.x2_rt = `${parseInt(this_vc.test_resizer_data.left, 10) + parseInt(this_vc.test_resizer_data.width, 10)}px`
+                this_vc.resizer_data.top = `${data_source_el.offsetTop}px`
+                this_vc.resizer_data.left = `${data_source_el.offsetLeft}px`
+                this_vc.resizer_data.height = `${data_source_el.height - 1}px`
+                this_vc.resizer_data.width = `${data_source_el.width - 1}px`
+                this_vc.resizer_data.image.x1_lt = `${parseInt(this_vc.resizer_data.left, 10)}px`
+                this_vc.resizer_data.image.x2_rt = `${parseInt(this_vc.resizer_data.left, 10) + parseInt(this_vc.resizer_data.width, 10)}px`
             },
             set_img_resizer_params(img_element, resizer_mode){
-                imgResizerHandlers = document.querySelectorAll('.resize_handlers')
-
                 this_vc.set_resizer_data(img_element)
                 this_vc.switch_resizer_mode(resizer_mode)
             },
             switch_resizer_mode(mode = 'default'){
                 switch (mode){
                     case 'active':
-                        imageResizer.classList.remove('sleep')
-                        imageResizer.classList.add('its_active')
-                        imgResizerHandlers.forEach(function(el){ el.classList.remove('inactive')})
+                        image_resizer.classList.remove('sleep')
+                        image_resizer.classList.add('its_active')
+                        resizer_handlers.forEach(function(el){ el.classList.remove('inactive')})
                         break
                     case 'sleep':
-                        imageResizer.classList.remove('its_active')
-                        imageResizer.classList.add('sleep')
-                        imgResizerHandlers.forEach(function(el){ el.classList.add('inactive')})
+                        image_resizer.classList.remove('its_active')
+                        image_resizer.classList.add('sleep')
+                        resizer_handlers.forEach(function(el){ el.classList.add('inactive')})
                         break
                     default:
-                        if(imageResizer.classList.contains('sleep')){
-                            imageResizer.classList.remove('sleep')
-                            imageResizer.classList.add('its_active')
-                            imgResizerHandlers.forEach(function(el){ el.classList.remove('inactive') })
+                        if(image_resizer.classList.contains('sleep')){
+                            image_resizer.classList.remove('sleep')
+                            image_resizer.classList.add('its_active')
+                            resizer_handlers.forEach(function(el){ el.classList.remove('inactive') })
                         } else {
-                            imageResizer.classList.remove('its_active')
-                            imageResizer.classList.add('sleep')
-                            imgResizerHandlers.forEach(function(el){ el.classList.add('inactive') })
+                            image_resizer.classList.remove('its_active')
+                            image_resizer.classList.add('sleep')
+                            resizer_handlers.forEach(function(el){ el.classList.add('inactive') })
                         }
                         break
                 }
             },
-            resize_image: function(e){
-                this_vc.mouse_down_on_IRH = true
-                this_vc.test_resizer_data.handler = e.target.classList[e.target.classList.length - 1]
-                console.log(`resize_image, this_vc.test_resizer_data.handler: ${this_vc.test_resizer_data.handler}`)
+            start_resize_image: function(e){
+                this_vc.mouse_down_on_resize_handler = true
+                this_vc.resizer_data.handler = e.target.classList[e.target.classList.length - 1]
+                console.log(`start_resize_image, this_vc.resizer_data.handler: ${this_vc.resizer_data.handler}`)
             },
             stop_resize_image: function(e){
-                if(this_vc.mouse_down_on_IRH === true){
-                    this_vc.mouse_down_on_IRH = false
+                if(this_vc.mouse_down_on_resize_handler === true){
+                    this_vc.mouse_down_on_resize_handler = false
                     console.log('stop_resize_image')
-                    this_vc.test_resizer_data.image.x1_old = ''
-                    this_vc.test_resizer_data.handler = ''
+                    this_vc.resizer_data.image.x1_old = ''
+                    this_vc.resizer_data.handler = ''
                 }
             },
             tester_function: function(e){

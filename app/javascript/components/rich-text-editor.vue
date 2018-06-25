@@ -90,6 +90,15 @@
                       x2_rt: ''
                   }
               },
+              calculation_data:{
+                width: 300,
+                height: 300,
+                top: 500,
+                left: 400,
+                x1_old: 0,
+                x1_lt: 0,
+                x2_rt: 0
+              },
               cursor:{
                   position: { x: 0, y: 0 }
               },
@@ -240,23 +249,60 @@
             },
             save_coordinates(e){
                 if(this_vc.mouse_down_on_resize_handler){
+                    // x2_rt, x1_old, x2_rt
 
                     this_vc.cursor.position.x = e.clientX - editable_area.offsetLeft
                     this_vc.cursor.position.y = e.clientY - editable_area.offsetTop
 
                     let resize_from_left_side = this_vc.resizer_data.handler.search('left') != -1
 
-                    let x_start = parseInt(resize_from_left_side ? this_vc.resizer_data.left : this_vc.resizer_data.image.x2_rt)
-                    let  x_old =  isNaN(parseInt(this_vc.resizer_data.image.x1_old)) ? x_start : parseInt(this_vc.resizer_data.image.x1_old, 10)
-                    let x_new = this_vc.cursor.position.x // это не нужно наверное
-                    let width_old = parseInt(this_vc.resizer_data.width) // это тоже не нужно наверное
+                    //oldcode
+                    // let x_start = parseInt(resize_from_left_side ? this_vc.resizer_data.left : this_vc.resizer_data.image.x2_rt)
+                    // let  x_old =  isNaN(parseInt(this_vc.resizer_data.image.x1_old)) ? x_start : parseInt(this_vc.resizer_data.image.x1_old, 10)
+                    // let x_new = this_vc.cursor.position.x // это не нужно наверное
+                    // let width_old = parseInt(this_vc.resizer_data.width) // это тоже не нужно наверное
+                    //
+                    // this_vc.resizer_data.width =  resize_from_left_side ? `${width_old - (x_new - x_old)}px` : `${width_old + (x_new - x_old)}px`
+                    // current_resizable_img.style.width = `${parseInt(this_vc.resizer_data.width) + 1}px`
+                    //
+                    // this_vc.resizer_data.height = `${parseInt(getComputedStyle(current_resizable_img).height) - 1}px`
+                    // this_vc.resizer_data.image.x1_old = `${x_new}px`
+                    // this_vc.resizer_data.image.x2_rt = `${parseInt(this_vc.resizer_data.left) + parseInt(this_vc.resizer_data.width)}px`
 
-                    this_vc.resizer_data.width =  resize_from_left_side ? `${width_old - (x_new - x_old)}px` : `${width_old + (x_new - x_old)}px`
-                    current_resizable_img.style.width = `${parseInt(this_vc.resizer_data.width) + 1}px`
+                    //newcode
+
+                    let x_start = resize_from_left_side ? this_vc.calculation_data.left : this_vc.calculation_data.x2_rt
+
+                    console.log(`this_vc.calculation_data.x1_old: ${this_vc.calculation_data.x1_old}, x_start: ${x_start}, this_vc.calculation_data.x1_old: ${this_vc.calculation_data.x1_old}`)
+                    let x_old = this_vc.calculation_data.x1_old ? this_vc.calculation_data.x1_old : x_start
+                    console.log(`x_old: ${x_old}`)
+                    let x_new = this_vc.cursor.position.x
+                    let width_old = this_vc.calculation_data.width
+
+                    let data_width = resize_from_left_side ? width_old - (x_new - x_old) : width_old + (x_new - x_old)
+
+                    this_vc.resizer_data.width = `${data_width}px`
+                    this_vc.calculation_data.width = data_width
+                    current_resizable_img.style.width = `${data_width + 1}px`
+                    console.log('save_coordinates')
+                    console.log(`save_coordinates width: ${data_width}`)
 
                     this_vc.resizer_data.height = `${parseInt(getComputedStyle(current_resizable_img).height) - 1}px`
-                    this_vc.resizer_data.image.x1_old = `${x_new}px`
-                    this_vc.resizer_data.image.x2_rt = `${parseInt(this_vc.resizer_data.left) + parseInt(this_vc.resizer_data.width)}px`
+                    this_vc.calculation_data.x1_old = x_new
+                    this_vc.calculation_data.x2_rt = this_vc.calculation_data.left + this_vc.calculation_data.width
+
+                    // let x_start = resize_from_left_side ? parseInt(this_vc.resizer_data.left) : this_vc.resizer_data.image.x2_rt
+                    // let x_old = isNaN(this_vc.resizer_data.image.x1_old) ? x_start : this_vc.resizer_data.image.x1_old
+                    // let x_new = this_vc.cursor.position.x // это не нужно наверное
+                    // let width_old = parseInt(this_vc.resizer_data.width) // это тоже не нужно наверное
+                    //
+                    // this_vc.resizer_data.width =  resize_from_left_side ? `${width_old - (x_new - x_old)}px` : `${width_old + (x_new - x_old)}px`
+                    // current_resizable_img.style.width = `${parseInt(this_vc.resizer_data.width) + 1}px`
+                    //
+                    // this_vc.resizer_data.height = `${parseInt(getComputedStyle(current_resizable_img).height) - 1}px`
+                    // this_vc.resizer_data.image.x1_old = x_new
+                    // this_vc.resizer_data.image.x2_rt = parseInt(this_vc.resizer_data.left) + parseInt(this_vc.resizer_data.width)
+
                 }
             },
             publish_content: function(){
@@ -336,11 +382,22 @@
             },
             set_resizer_data(data_source_el){
                 this_vc.resizer_data.top = `${data_source_el.offsetTop}px`
-                this_vc.resizer_data.left = `${data_source_el.offsetLeft}px`
                 this_vc.resizer_data.height = `${data_source_el.height - 1}px`
+
+                this_vc.resizer_data.left = `${data_source_el.offsetLeft}px`
+                this_vc.calculation_data.left = data_source_el.offsetLeft
+
                 this_vc.resizer_data.width = `${data_source_el.width - 1}px`
-                this_vc.resizer_data.image.x1_lt = `${parseInt(this_vc.resizer_data.left, 10)}px`
-                this_vc.resizer_data.image.x2_rt = `${parseInt(this_vc.resizer_data.left, 10) + parseInt(this_vc.resizer_data.width, 10)}px`
+                this_vc.calculation_data.width = data_source_el.width
+
+                //newcode
+
+                this_vc.calculation_data.x1_lt = this_vc.calculation_data.left
+                this_vc.calculation_data.x2_rt = this_vc.calculation_data.left + this_vc.calculation_data.width
+
+                //oldcode
+                // this_vc.resizer_data.image.x1_lt = `${parseInt(this_vc.resizer_data.left, 10)}px`
+                // this_vc.resizer_data.image.x2_rt = `${parseInt(this_vc.resizer_data.left, 10) + parseInt(this_vc.resizer_data.width, 10)}px`
             },
             set_img_resizer_params(img_element, resizer_mode){
                 this_vc.set_resizer_data(img_element)
@@ -380,8 +437,14 @@
                 if(this_vc.mouse_down_on_resize_handler === true){
                     this_vc.mouse_down_on_resize_handler = false
                     console.log('stop_resize_image')
-                    this_vc.resizer_data.image.x1_old = ''
+
+                    //newcode
+
+                    this_vc.calculation_data.x1_old = 0
                     this_vc.resizer_data.handler = ''
+                    //oldcode
+                    // this_vc.resizer_data.image.x1_old = ''
+                    // this_vc.resizer_data.handler = ''
                 }
             },
             tester_function: function(e){

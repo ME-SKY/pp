@@ -1,6 +1,6 @@
 <template>
 
-    <div class="editable_content">
+    <div class="editor_block">
 
         <div class="edit-buttons">
 
@@ -26,7 +26,7 @@
             <input @change="insert_image" type="file" name="file" accept="image/*"  hidden/>
         </form>
 
-        <div class="scoo_pee_dee_poo" style="height: 1000px; width: 1000px; border: 1px solid red; position: relative;" @mousemove="save_coordinates" @mouseup="stop_resize_image" id="editable_area">
+        <div style="width: 1000px; border: 1px solid red; position: relative;"  id="editable_area">
 
             <div id="richED" ref="reditor"  @mouseup="show_formatting_styles" @keydown.enter="add_br"  @keydown.delete="prevent_p_deletion" contenteditable="true" @mouseover="mouse_on_editor = true" @mouseout="mouse_on_editor = false" @click="activate_area"  @keyup.delete="before_deletion">
 
@@ -72,9 +72,11 @@
                   p_tab_index: 1000,
                   img_tab_index: 100
               },
-              max_image_width: '799px',
+              max_image_width: '967px',
               mouse_down_on_resize_handler: false,
               mouse_on_editor: false,
+              mouse_on_image: false,
+              mouse_on_image_resizer: false,
               width: 0,
               height: 0,
               resizer_data: {
@@ -83,7 +85,7 @@
                   height: '300px',
                   top: '500px',
                   left: '400px',
-                  maxWidth: '798px',
+                  maxWidth: '966px',
                   image: {
                       x1_old: '',
                       x1_lt: '',
@@ -124,19 +126,25 @@
             resizer_handlers = document.querySelectorAll('.resize_handlers')
             editable_area = document.querySelector('#editable_area')
 
-            image_resizer.onfocus = () => {
-                this_vc.switch_resizer_mode('active')
-            }
+            document.addEventListener('mousemove', this_vc.save_coordinates)
+            document.addEventListener(('mouseup'), this_vc.stop_resize_image)
 
-            image_resizer.onblur = (e) => {
+            image_resizer.onfocus = () => { this_vc.switch_resizer_mode('active') }
+
+            image_resizer.onblur = e => {
                 if(e.relatedTarget){
-                    if(e.relatedTarget.nodeName != 'IMG'){
+                    if(e.relatedTarget.nodeName != 'IMG' && e.relatedTarget.id !== 'image_resizer'){
                         this_vc.switch_resizer_mode()
+                        this_vc.stop_resize_image()
                     }
                 }else{
                     this_vc.switch_resizer_mode()
+                    this_vc.stop_resize_image()
                 }
             }
+
+            image_resizer.onmouseover = e => { this_vc.mouse_on_image_resizer = true }
+            image_resizer.onmouseout = e => { this_vc.mouse_on_image_resizer = false }
 
             var imageObserver = new MutationObserver(function(mutations) {
                 mutations.forEach(function(mutation) {
@@ -155,12 +163,32 @@
                                 let imgsLength = this_vc.$refs.reditor.querySelectorAll('img').length
                                 imageNode.setAttribute('tabindex', `${this_vc.magic_numbers.img_tab_index + imgsLength}`)
 
-                                imageNode.onfocus = e => {
+                                // imageNode.onfocus = e => {
+                                //     console.log('preventing focus on imageNode')
+                                //     e.preventDefault()
+                                    // console.log('imageNode.onfocus')
+                                    // current_resizable_img = imageNode
+                                    // this_vc.set_img_resizer_params(imageNode, 'active')
+                                // }
+
+                                imageNode.onmousedown = e => {
                                     current_resizable_img = imageNode
                                     this_vc.set_img_resizer_params(imageNode, 'active')
                                 }
+
+                                imageNode.onmouseover = () => { this_vc.mouse_on_image = true }
+                                imageNode.onmouseout = () => { this_vc.mouse_on_image = false }
                                 imageNode.onblur = e => {
-                                    this_vc.switch_resizer_mode()
+
+                                    if(e.relatedTarget){
+                                        if(e.relatedTarget.nodeName !== 'IMG' && e.relatedTarget.id !== 'image_resizer'){
+                                            this_vc.switch_resizer_mode('sleep')
+                                        }else{
+                                            image_resizer.focus()
+                                        }
+                                    }else{
+                                        this_vc.switch_resizer_mode('sleep')
+                                    }
                                 }
                             }, UIEvent)
                         }
@@ -176,6 +204,10 @@
                 }
             );
 
+        },
+        destroyed: function(){
+            document.removeEventListener('mousemove', this_vc.save_coordinates)
+            document.removeEventListener('mouseup', this_vc.stop_resize_image)
         },
         methods: {
             prepare_for_resizing(resized_img){
@@ -194,28 +226,43 @@
                 if(e.target.children.length === 1){
                     if(!e.target.lastChild.hasChildNodes()){
                         var brTag = document.createElement('br')
+                        // brTag.contentEditable = true
                         e.target.lastChild.appendChild(brTag)
                     }
                 }
             },
             prevent_p_deletion: function(e){
-//new code
                 if(this_vc.$refs.reditor.children.length <= 1){
-
                     var editableP = this_vc.$refs.reditor.lastChild
 
-                    if(editableP){
-                        if(editableP.lastChild){
-                            if(editableP.lastChild.nodeValue == null){
+
+                    //newcode
+                    if(editableP) {
+                        if(editableP.lastChild) {
+                            if(editableP.lastChild.nodeValue == null && !editableP.lastChild.nodeName === 'BR') {
                                 e.preventDefault()
                             }
                         }else{
                             e.preventDefault()
                         }
                     }
+                    //oldcode
+                    // if(editableP){
+                    //     if(editableP.lastChild){
+                    //         if(editableP.lastChild.nodeValue == null){
+                    //             if(!editableP.lastChild.nodeName === 'BR'){
+                    //                 e.preventDefault()
+                    //             }
+                    //
+                    //         }
+                    //     }else{
+                    //         e.preventDefault()
+                    //     }
+                    // }
                 }
             },
             before_deletion: function(){
+                console.log('before_deletion')
                 if(this_vc.$refs.reditor.children.length === 1){
 
                     var editableP = this_vc.$refs.reditor.firstChild
@@ -228,12 +275,19 @@
                             editableP.innerText = ''
                         }
                     }else {
+                        console.log('editableP.firstChild: ' + editableP.firstChild)
+                        //newcode
 
-                        if(editableP.firstChild != null){
-                            if(editableP.firstChild.tagName === 'BR') {
-                                editableP.firstChild.remove()
-                            }
+                        if(editableP.firstChild != null && editableP.firstChild.tagName === 'BR'){
+                            editableP.firstChild.remove()
                         }
+
+                        //oldcode
+                        // if(editableP.firstChild != null){
+                        //     if(editableP.firstChild.tagName === 'BR') {
+                        //         editableP.firstChild.remove()
+                        //     }
+                        // }
 
                     }
                 }
@@ -248,34 +302,16 @@
                 }
             },
             save_coordinates(e){
+                // console.log(`this_vc.mouse_down_on_resize_handler: ${this_vc.mouse_down_on_resize_handler}`)
                 if(this_vc.mouse_down_on_resize_handler){
-                    // x2_rt, x1_old, x2_rt
 
                     this_vc.cursor.position.x = e.clientX - editable_area.offsetLeft
                     this_vc.cursor.position.y = e.clientY - editable_area.offsetTop
 
                     let resize_from_left_side = this_vc.resizer_data.handler.search('left') != -1
-
-                    //oldcode
-                    // let x_start = parseInt(resize_from_left_side ? this_vc.resizer_data.left : this_vc.resizer_data.image.x2_rt)
-                    // let  x_old =  isNaN(parseInt(this_vc.resizer_data.image.x1_old)) ? x_start : parseInt(this_vc.resizer_data.image.x1_old, 10)
-                    // let x_new = this_vc.cursor.position.x // это не нужно наверное
-                    // let width_old = parseInt(this_vc.resizer_data.width) // это тоже не нужно наверное
-                    //
-                    // this_vc.resizer_data.width =  resize_from_left_side ? `${width_old - (x_new - x_old)}px` : `${width_old + (x_new - x_old)}px`
-                    // current_resizable_img.style.width = `${parseInt(this_vc.resizer_data.width) + 1}px`
-                    //
-                    // this_vc.resizer_data.height = `${parseInt(getComputedStyle(current_resizable_img).height) - 1}px`
-                    // this_vc.resizer_data.image.x1_old = `${x_new}px`
-                    // this_vc.resizer_data.image.x2_rt = `${parseInt(this_vc.resizer_data.left) + parseInt(this_vc.resizer_data.width)}px`
-
-                    //newcode
-
                     let x_start = resize_from_left_side ? this_vc.calculation_data.left : this_vc.calculation_data.x2_rt
 
-                    console.log(`this_vc.calculation_data.x1_old: ${this_vc.calculation_data.x1_old}, x_start: ${x_start}, this_vc.calculation_data.x1_old: ${this_vc.calculation_data.x1_old}`)
                     let x_old = this_vc.calculation_data.x1_old ? this_vc.calculation_data.x1_old : x_start
-                    console.log(`x_old: ${x_old}`)
                     let x_new = this_vc.cursor.position.x
                     let width_old = this_vc.calculation_data.width
 
@@ -284,24 +320,10 @@
                     this_vc.resizer_data.width = `${data_width}px`
                     this_vc.calculation_data.width = data_width
                     current_resizable_img.style.width = `${data_width + 1}px`
-                    console.log('save_coordinates')
-                    console.log(`save_coordinates width: ${data_width}`)
 
                     this_vc.resizer_data.height = `${parseInt(getComputedStyle(current_resizable_img).height) - 1}px`
                     this_vc.calculation_data.x1_old = x_new
                     this_vc.calculation_data.x2_rt = this_vc.calculation_data.left + this_vc.calculation_data.width
-
-                    // let x_start = resize_from_left_side ? parseInt(this_vc.resizer_data.left) : this_vc.resizer_data.image.x2_rt
-                    // let x_old = isNaN(this_vc.resizer_data.image.x1_old) ? x_start : this_vc.resizer_data.image.x1_old
-                    // let x_new = this_vc.cursor.position.x // это не нужно наверное
-                    // let width_old = parseInt(this_vc.resizer_data.width) // это тоже не нужно наверное
-                    //
-                    // this_vc.resizer_data.width =  resize_from_left_side ? `${width_old - (x_new - x_old)}px` : `${width_old + (x_new - x_old)}px`
-                    // current_resizable_img.style.width = `${parseInt(this_vc.resizer_data.width) + 1}px`
-                    //
-                    // this_vc.resizer_data.height = `${parseInt(getComputedStyle(current_resizable_img).height) - 1}px`
-                    // this_vc.resizer_data.image.x1_old = x_new
-                    // this_vc.resizer_data.image.x2_rt = parseInt(this_vc.resizer_data.left) + parseInt(this_vc.resizer_data.width)
 
                 }
             },
@@ -390,20 +412,16 @@
                 this_vc.resizer_data.width = `${data_source_el.width - 1}px`
                 this_vc.calculation_data.width = data_source_el.width
 
-                //newcode
-
                 this_vc.calculation_data.x1_lt = this_vc.calculation_data.left
                 this_vc.calculation_data.x2_rt = this_vc.calculation_data.left + this_vc.calculation_data.width
-
-                //oldcode
-                // this_vc.resizer_data.image.x1_lt = `${parseInt(this_vc.resizer_data.left, 10)}px`
-                // this_vc.resizer_data.image.x2_rt = `${parseInt(this_vc.resizer_data.left, 10) + parseInt(this_vc.resizer_data.width, 10)}px`
             },
             set_img_resizer_params(img_element, resizer_mode){
                 this_vc.set_resizer_data(img_element)
                 this_vc.switch_resizer_mode(resizer_mode)
             },
             switch_resizer_mode(mode = 'default'){
+                console.log(`switch_resizer_mode, mode: ${mode}`)
+                console.log(`image_resizer.classList.contains('sleep'): ${image_resizer.classList.contains('sleep')}`)
                 switch (mode){
                     case 'active':
                         image_resizer.classList.remove('sleep')
@@ -417,6 +435,7 @@
                         break
                     default:
                         if(image_resizer.classList.contains('sleep')){
+                            console.log(`image_resizer.classList.contains('sleep'): ${image_resizer.classList.contains('sleep')}`)
                             image_resizer.classList.remove('sleep')
                             image_resizer.classList.add('its_active')
                             resizer_handlers.forEach(function(el){ el.classList.remove('inactive') })
@@ -431,23 +450,19 @@
             start_resize_image: function(e){
                 this_vc.mouse_down_on_resize_handler = true
                 this_vc.resizer_data.handler = e.target.classList[e.target.classList.length - 1]
-                console.log(`start_resize_image, this_vc.resizer_data.handler: ${this_vc.resizer_data.handler}`)
             },
             stop_resize_image: function(e){
+                console.log('stop_resize_image')
+                console.log(`activeElement: ${document.activeElement}`)
                 if(this_vc.mouse_down_on_resize_handler === true){
                     this_vc.mouse_down_on_resize_handler = false
-                    console.log('stop_resize_image')
-
-                    //newcode
-
                     this_vc.calculation_data.x1_old = 0
                     this_vc.resizer_data.handler = ''
-                    //oldcode
-                    // this_vc.resizer_data.image.x1_old = ''
-                    // this_vc.resizer_data.handler = ''
                 }
             },
             tester_function: function(e){
+                this_vc.stop_resize_image()
+                // this_vc.switch_resizer_mode('sleep')
                 console.log('tester function e.target')
                 console.dir(e.target)
                 console.log('tester function event.target')
@@ -460,7 +475,9 @@
 
 <style lang="scss" scoped>
 
-    .scoo_pee_dee_poo{
+    #editable_area{
+        box-sizing: content-box;
+        height: content-box;
         white-space: pre-wrap;
         word-wrap: break-word;
     }
@@ -470,26 +487,25 @@
     }
 
     .image_resizer{
-        tab-index: 100;
+        /*tab-index: 100;*/
         position: absolute;
         border: solid 1px #1e88e5;
         display: none;
         user-select: none;
         box-sizing: content-box;
-        max-width: 800px;
+        max-width: 970px;
 
         &.its_active{
             display: block
         }
 
         &.sleep{
-            display: block;
+            /*display: none;*/
             border: none;
         }
 
         &:focus{
             outline: none;
-            /*border: none;*/
         }
     }
 
@@ -536,70 +552,11 @@
         }
     }
 
-    #placeholder2{ // second example
-        display: block;
-        pointer-events: none;
-        top: 20px;
-        position: absolute;
-        z-index: 1;
-        outline: none;
-
-
-    }
-
-    .heightone{
-        z-index: -1;
-        outline: none;
-        /*overflow: inherit;*/
-        /*box-sizing: content-box;*/
-        border: none;
-        width: 100%;
-        height: 100%;
-
-        p{
-            outline: none;
-            box-sizing: content-box;
-            border: none;
-        }
-
-        &:focus{
-            outline: none;
-            border: none;
-        }
-
-
-    }
-
-    .hidden_span{
-        visibility: hidden;
-    }
-
-    .placeholderSpan{
-        display: block;
-        pointer-events: none;
-        font-size: 16px;
-        line-height: 24px;
-        margin-top: 0px;
-        padding-top: 16px;
-        padding-left: 16px;
-        margin-left: 0px;
-        padding-right: 16px;
-        margin-right: 0px;
-        text-align: left;
-        position: absolute;
-        color: #aaaaaa;
-        z-index: 1;
-        top: 0;
-        left: 0;
-        right: 0;
-        overflow: hidden;
-    }
-
     #richED{
         position: relative;
         box-sizing: content-box;
         min-height: 399px;
-        width: 800px;
+        width: 967px;
         height: auto;
         overflow: hidden;
         border: 0;
@@ -633,19 +590,6 @@
         overflow: hidden;
     }
 
-    body{
-
-    }
-
-
-    iframe{
-
-        overflow-x: hidden;
-        border: 0;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.12),0 1px 1px 1px rgba(0,0,0,0.16);
-        background: white;
-    }
-
     .edit-buttons{
         height: 40px;
         box-shadow: 0 1px 3px rgba(0,0,0,0.12),0 1px 1px 1px rgba(0,0,0,0.16);
@@ -676,21 +620,8 @@
         margin: 16px 0 0;
     }
 
-    .edit-buttons-group{
-    }
-
-    .iconBox{
-    }
-
-    #imageEditButton{
-    }
-
     .not-a-buttons-group{
         background: white;
-    }
-
-    .canvas_example{
-        border: 1px green;
     }
 
     .res_img{

@@ -55,6 +55,7 @@
     }
 
     #editor-box{
+        margin-left: -42px
         /*margin-left: 35%;*/
         /*margin-right: auto;*/
     }

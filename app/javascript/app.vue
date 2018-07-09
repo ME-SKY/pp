@@ -11,11 +11,15 @@
             </transition>
             <div id="hidden-empty-tag"></div>
         </div>
+        <div class="posts_previews">
+            <previews-of-posts/>
+        </div>
         <div class="posts_list_component"><posts-list/></div>
     </div>
 </template>
 
 <script>
+    import PreviewsOfPosts from './components/previews-of-posts.vue'
     import PostsList from './components/posts-list.vue'
     import RichTextEditor from './components/rich-text-editor.vue'
     import FaPlusSquare from '@fortawesome/fontawesome-free-solid/faPlusSquare'
@@ -31,7 +35,7 @@
            }
         },
         components: {
-            PostsList, RichTextEditor
+            PostsList, RichTextEditor, PreviewsOfPosts
         },
         computed: {
             faPlusSquire () {

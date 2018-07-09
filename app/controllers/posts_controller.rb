@@ -1,9 +1,17 @@
 class PostsController < ApplicationController
   def index
+    p "params: #{params.inspect}"
     @post = Post.new
-    @posts = Post.all.includes(:attachments).order(updated_at: :desc)
 
-    render json: @posts, include: :attachments
+    if params[:give_me_previews] == 'yes'
+      @posts = Post.select(:description_image).order(updated_at: :desc)
+      render json: @posts
+    else
+      @posts = Post.all.includes(:attachments).order(updated_at: :desc)
+      render json: @posts, include: :attachments
+    end
+
+    # render json: @posts, include: :attachments
   end
 
   def new

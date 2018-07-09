@@ -2,6 +2,12 @@
 
     <div class="editor_block">
 
+
+        <div class="preview_block">
+            <!-- background for post preview insert this -->
+
+        </div>
+
         <div class="edit-buttons">
 
             <div class="edit-buttons-group">
@@ -26,7 +32,7 @@
             <input @change="insert_image" type="file" name="file" accept="image/*"  hidden/>
         </form>
 
-        <div style="width: 1000px; border: 1px solid red; position: relative;"  id="editable_area">
+        <div style="width: 1000px; position: relative;"  id="editable_area">
 
             <div id="richED" ref="reditor"  @mouseup="show_formatting_styles" @keydown.enter="add_br"  @keydown.delete="prevent_p_deletion" contenteditable="true" @mouseover="mouse_on_editor = true" @mouseout="mouse_on_editor = false" @click="activate_area"  @keyup.delete="before_deletion">
 
@@ -146,7 +152,7 @@
             image_resizer.onmouseover = e => { this_vc.mouse_on_image_resizer = true }
             image_resizer.onmouseout = e => { this_vc.mouse_on_image_resizer = false }
 
-            var imageObserver = new MutationObserver(function(mutations) {
+            var editor_obs = new MutationObserver(function(mutations) {
                 mutations.forEach(function(mutation) {
 
                     if(mutation.addedNodes.length > 0){
@@ -156,20 +162,12 @@
                             imageNode.setAttribute('tabindex', `${++this_vc.magic_numbers.p_tab_index}`)
                         }
 
-                        if(imageNode.nodeName == 'IMG' && !imageNode.classList.contains('active_img')){
+                        if(imageNode.nodeName == 'IMG' && !imageNode.classList.contains('new_inserted_img')){
                             imageNode.addEventListener('load', () => {
 
                                 this_vc.prepare_for_resizing(imageNode)
                                 let imgsLength = this_vc.$refs.reditor.querySelectorAll('img').length
                                 imageNode.setAttribute('tabindex', `${this_vc.magic_numbers.img_tab_index + imgsLength}`)
-
-                                // imageNode.onfocus = e => {
-                                //     console.log('preventing focus on imageNode')
-                                //     e.preventDefault()
-                                    // console.log('imageNode.onfocus')
-                                    // current_resizable_img = imageNode
-                                    // this_vc.set_img_resizer_params(imageNode, 'active')
-                                // }
 
                                 imageNode.onmousedown = e => {
                                     current_resizable_img = imageNode
@@ -196,7 +194,7 @@
                 });
             });
 
-            imageObserver.observe(
+            editor_obs.observe(
                 document.getElementById('richED'),
                 {
                     childList: true,
@@ -211,7 +209,7 @@
         },
         methods: {
             prepare_for_resizing(resized_img){
-                resized_img.className = 'active_img'
+                resized_img.className = 'new_inserted_img'
                 resized_img.className += ' res_img'
                 resized_img.className += ' inserted_image'
 
@@ -232,14 +230,17 @@
                 }
             },
             prevent_p_deletion: function(e){
+
+                console.log('on deletion')
                 if(this_vc.$refs.reditor.children.length <= 1){
+                    console.log('this_vc.$refs.reditor.children.length <= 1 is TRUE')
                     var editableP = this_vc.$refs.reditor.lastChild
 
 
                     //newcode
                     if(editableP) {
                         if(editableP.lastChild) {
-                            if(editableP.lastChild.nodeValue == null && !editableP.lastChild.nodeName === 'BR') {
+                            if(editableP.lastChild.nodeValue == null || !editableP.lastChild.nodeName === 'BR') {
                                 e.preventDefault()
                             }
                         }else{
@@ -275,20 +276,9 @@
                             editableP.innerText = ''
                         }
                     }else {
-                        console.log('editableP.firstChild: ' + editableP.firstChild)
-                        //newcode
-
                         if(editableP.firstChild != null && editableP.firstChild.tagName === 'BR'){
                             editableP.firstChild.remove()
                         }
-
-                        //oldcode
-                        // if(editableP.firstChild != null){
-                        //     if(editableP.firstChild.tagName === 'BR') {
-                        //         editableP.firstChild.remove()
-                        //     }
-                        // }
-
                     }
                 }
 
@@ -302,7 +292,6 @@
                 }
             },
             save_coordinates(e){
-                // console.log(`this_vc.mouse_down_on_resize_handler: ${this_vc.mouse_down_on_resize_handler}`)
                 if(this_vc.mouse_down_on_resize_handler){
 
                     this_vc.cursor.position.x = e.clientX - editable_area.offsetLeft
@@ -343,6 +332,11 @@
                         this_vc.$root.$emit('newPostIsCreated', respText)
                     }
                 }
+            },
+            prepare_content_to_publish(){
+                let elements = this_vc.$refs.reditor.querySelectorAll('img')
+                elements.forEach(function(e){ e.classList.remove('new_inserted_img') })
+                // TODO write code to removing classes from all images in redactor
             },
             click_on_input_field: function() {
                 document.querySelector('input[name="file"]').click()
@@ -459,14 +453,6 @@
                     this_vc.calculation_data.x1_old = 0
                     this_vc.resizer_data.handler = ''
                 }
-            },
-            tester_function: function(e){
-                this_vc.stop_resize_image()
-                // this_vc.switch_resizer_mode('sleep')
-                console.log('tester function e.target')
-                console.dir(e.target)
-                console.log('tester function event.target')
-                console.dir(event.target)
             }
         }
     }
@@ -500,7 +486,6 @@
         }
 
         &.sleep{
-            /*display: none;*/
             border: none;
         }
 

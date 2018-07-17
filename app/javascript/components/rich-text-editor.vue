@@ -34,6 +34,10 @@
 
         <div style="width: 1000px; position: relative;"  id="editable_area">
 
+            <div class="header-post-theme">
+
+            </div>
+
             <div id="richED" ref="reditor"  @mouseup="show_formatting_styles" @keydown.enter="add_br"  @keydown.delete="prevent_p_deletion" contenteditable="true" @mouseover="mouse_on_editor = true" @mouseout="mouse_on_editor = false" @click="activate_area"  @keyup.delete="before_deletion">
 
                 <p class="writer" :tabindex="magic_numbers.p_tab_index"></p>
@@ -231,19 +235,31 @@
             },
             prevent_p_deletion: function(e){
 
-                console.log('on deletion')
-                if(this_vc.$refs.reditor.children.length <= 1){
-                    console.log('this_vc.$refs.reditor.children.length <= 1 is TRUE')
+                if(this_vc.$refs.reditor.children.length === 1){
                     var editableP = this_vc.$refs.reditor.lastChild
 
 
                     //newcode
+
+
+
                     if(editableP) {
                         if(editableP.lastChild) {
-                            if(editableP.lastChild.nodeValue == null || !editableP.lastChild.nodeName === 'BR') {
-                                e.preventDefault()
+
+                            if(editableP.childNodes.length === 1){
+                                if( editableP.firstChild.nodeValue == null) {
+                                    e.preventDefault()
+                                }
                             }
+
+                            if(editableP.lastChild.nodeValue == null || !editableP.lastChild.nodeName === 'BR') {
+                                if(!editableP.lastChild.nodeName === 'IMG'){
+                                    console.log('!editableP.lastChild.nodeName === \'IMG\'')
+                                    e.preventDefault()
+                                }
+                             }
                         }else{
+                            console.log('after editableP.lastChild is false')
                             e.preventDefault()
                         }
                     }
@@ -276,7 +292,9 @@
                             editableP.innerText = ''
                         }
                     }else {
+                        console.log(`!editableP.isContentEditable is false`)
                         if(editableP.firstChild != null && editableP.firstChild.tagName === 'BR'){
+                            console.log('editableP.firstChild != null && editableP.firstChild.tagName === \'BR\'')
                             editableP.firstChild.remove()
                         }
                     }
@@ -336,7 +354,7 @@
             prepare_content_to_publish(){
                 let elements = this_vc.$refs.reditor.querySelectorAll('img')
                 elements.forEach(function(e){ e.classList.remove('new_inserted_img') })
-                // TODO write code to removing classes from all images in redactor
+                // TODO write code to removing classes from all content nodes in redactor
             },
             click_on_input_field: function() {
                 document.querySelector('input[name="file"]').click()
@@ -397,9 +415,11 @@
                 return node_names
             },
             set_resizer_data(data_source_el){
-                this_vc.resizer_data.top = `${data_source_el.offsetTop}px`
+                console.log(`data_source_el.offsetTop: ${data_source_el.offsetTop + 120}`)
+                this_vc.resizer_data.top = `${data_source_el.offsetTop + 118}px`
                 this_vc.resizer_data.height = `${data_source_el.height - 1}px`
 
+                console.log(`data_source_el.offsetLeft: ${data_source_el.offsetLeft}`)
                 this_vc.resizer_data.left = `${data_source_el.offsetLeft}px`
                 this_vc.calculation_data.left = data_source_el.offsetLeft
 
@@ -460,6 +480,23 @@
 
 
 <style lang="scss" scoped>
+
+    .header-post-theme{
+        height: 100px;
+        width: auto;
+        box-shadow: 0 0px 1px 0px rgba(0, 0, 0, 0.16), 0 1px 1px 1px rgba(0, 0, 0, 0.11), 0 2px 5px 0px rgba(0, 0, 0, 0.04);
+        margin: 8px 0;
+    }
+
+    .editor_block{
+        margin-bottom: 50px;
+    }
+
+    .preview_block{
+        margin-top: 20px;
+        height: 50px;
+        width: auto;
+    }
 
     #editable_area{
         box-sizing: content-box;

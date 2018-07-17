@@ -1,9 +1,8 @@
 class PostsController < ApplicationController
   def index
-    p "params: #{params.inspect}"
     @post = Post.new
 
-    if params[:give_me_previews] == 'yes'
+    if params[:get_previews]
       @posts = Post.select(:description_image).order(updated_at: :desc)
       render json: @posts
     else
@@ -44,4 +43,10 @@ class PostsController < ApplicationController
 
   def destroy
   end
+
+  private
+
+  # def permit_params
+  #   params.permit!('')
+  # end
 end

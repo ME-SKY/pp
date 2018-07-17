@@ -5,7 +5,7 @@ class Post < ApplicationRecord
   mount_uploader :file, AttachmentUploader
 
   def set_description
-    self.description_image ||= 'catbug.gif'
+    self.description_image ||= 'default_post_description_img.jpg'
 
     # if text.length > 181
     #   self.description = text.slice(0, 180) + '...'

@@ -28,8 +28,8 @@
         justify-content: center;
 
         img{
-            max-width: 500px;
-            max-height: 340px;
+            max-width: 495px;
+            max-height: 300px;
         }
 
     }

@@ -14,7 +14,7 @@
         <div class="posts_previews">
             <previews-of-posts/>
         </div>
-        <div class="posts_list_component"><posts-list/></div>
+        <!--<div class="posts_list_component"><posts-list/></div>-->
     </div>
 </template>
 
@@ -48,6 +48,7 @@
 <style lang="scss"  >
 
     #app_posts{
+        overflow: hidden;
         display: flex;
         flex-direction: column;
     }

@@ -35,7 +35,9 @@
         <div style="width: 1000px; position: relative;"  id="editable_area">
 
             <div class="header-post-theme">
-
+                <label for="post_theme" id="label_post_theme" >ТАЙТЛ</label>
+                <input id="post_theme" type="text" >
+                <!--<div class="dop-block"></div>-->
             </div>
 
             <div id="richED" ref="reditor"  @mouseup="show_formatting_styles" @keydown.enter="add_br"  @keydown.delete="prevent_p_deletion" contenteditable="true" @mouseover="mouse_on_editor = true" @mouseout="mouse_on_editor = false" @click="activate_area"  @keyup.delete="before_deletion">
@@ -466,8 +468,8 @@
                 this_vc.resizer_data.handler = e.target.classList[e.target.classList.length - 1]
             },
             stop_resize_image: function(e){
-                console.log('stop_resize_image')
-                console.log(`activeElement: ${document.activeElement}`)
+                // console.log('stop_resize_image')
+                // console.log(`activeElement: ${document.activeElement}`)
                 if(this_vc.mouse_down_on_resize_handler === true){
                     this_vc.mouse_down_on_resize_handler = false
                     this_vc.calculation_data.x1_old = 0
@@ -481,15 +483,132 @@
 
 <style lang="scss" scoped>
 
+    @keyframes woops_boom1 {
+        0%{
+            transform: translateX(0);
+        }
+
+
+
+        100%{
+            transform: matrix(12, 0, 0, 12, 200, 250) rotate(90deg);
+        }
+        /*35%{*/
+            /*!*animation-play-state: paused;*!*/
+            /*!*animation-fill-mode: none;*!*/
+            /*transform: none;*/
+            /*!*transform: matrix(1, 0, 0, 1, 0, 0) rotate(0deg);*!*/
+        /*}*/
+
+        /*100%{*/
+            /*transform: matrix(17, 0, 0, 18, 400, 500) rotate(800deg);*/
+        /*}*/
+    }
+
+    @keyframes woops_boom2{
+        0%{
+            transform: matrix(1, 0, 0, 1, 0, 0) rotate(0deg);
+        }
+
+        100%{
+            transform: matrix(12, 0, 0, 12, 200, 250) rotate(90deg);
+        }
+    }
+
+    @keyframes woops_boom2_2{
+        0%{
+            transform: matrix(12, 0, 0, 12, 200, 250) rotate(90deg);
+        }
+
+        100%{
+            transform: matrix(12, 0, 0, 12, 200, 250) rotate(180deg);
+        }
+    }
+
+    @keyframes woops_boom2_6{
+        0%{
+            transform: matrix(1, 0, 0, 1, 0, 0) rotate(0deg);
+        }
+
+        100%{
+            transform: matrix(12, 0, 0, 12, 200, 250) rotate(180deg);
+        }
+    }
+
+    @keyframes woops_boom2_8{
+        0%{
+            transform: matrix(12, 0, 0, 12, 200, 250) rotate(180deg);
+        }
+
+        100%{
+            transform: matrix(12, 0, 0, 12, 200, 250) rotate(270deg);
+        }
+    }
+
+    @keyframes woops_boom3 {
+        0%{
+            transform: matrix(12, 0, 0, 12, 200, 250) rotate(90deg);
+        }
+        100%{
+            transform: matrix(17, 0, 0, 18, 400, 500) rotate(800deg)
+        }
+    }
+
+    @keyframes color_dif {
+        0%{
+            color: #B00100;
+        }
+
+        100%{
+            color: #1e88e5;
+        }
+
+    }
+
+    #post_theme{
+        margin: 8px;
+        /*width: 98%;*/
+        background: rgba(0,0,0,0.16);
+
+        /*margin: 8px;*/
+        width: 800px;
+        height: 23px;
+        /*background: rgba(0, 0, 0, .16);*/
+        border-style: unset;
+        font: 400 1.5em BlinkMacSystemFont, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;;
+        outline: none;
+
+    }
+
+    #label_post_theme{
+
+        animation-name: woops_boom1, woops_boom2, woops_boom2_2, woops_boom2_6, woops_boom2_8, woops_boom3;
+        animation-duration: 2s, 0.1s, 0.1s, 0.1s, 0.1s, 3s; /* Продолжительность анимации */
+        animation-delay: 4s, 6s, 6.1s, 6.2s, 6.3s, 6.4s, 9.4s; /* Задержка */
+        animation-fill-mode: forwards, forwards;
+        animation-timing-function: linear, step-end, linear, step-end, linear, linear;
+
+        /*animation: woops_boom1 2.5s infinite normal forwards, woops_boom2 3s infinite normal step-end forwards;*/
+        z-index: 1;
+    }
+
     .header-post-theme{
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
         height: 100px;
         width: auto;
-        box-shadow: 0 0px 1px 0px rgba(0, 0, 0, 0.16), 0 1px 1px 1px rgba(0, 0, 0, 0.11), 0 2px 5px 0px rgba(0, 0, 0, 0.04);
-        margin: 8px 0;
+        box-shadow: 0 0px 1px 0px rgba(0, 0, 0, 0.16), 0 1px 1px 1px rgba(0, 0, 0, 0.12), 0 3px 5px 0px rgba(0, 0, 0, 0.08), 0 3px 7px 0px rgba(0, 0, 0, 0.04);
+        margin: 16px 0;
     }
 
     .editor_block{
         margin-bottom: 50px;
+    }
+
+    .dop-block{
+        width: 1px;
+        height: 1px;
     }
 
     .preview_block{
@@ -501,7 +620,7 @@
     #editable_area{
         box-sizing: content-box;
         height: content-box;
-        white-space: pre-wrap;
+        /*white-space: pre-wrap;*/
         word-wrap: break-word;
     }
 

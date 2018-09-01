@@ -38,6 +38,7 @@
     "vue2-dropzone": "^3.0.6"
   },
   "devDependencies": {
+    "webpack": "^4.17.1",
     "webpack-dev-server": "^3.1.0"
   }
 }

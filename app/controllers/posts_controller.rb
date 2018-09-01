@@ -1,4 +1,4 @@
-class PostsController < ApplicationController
+class PostsController < FrontController
   def index
     @post = Post.new
     @posts = Post.all.includes(:attachments).order(updated_at: :desc)

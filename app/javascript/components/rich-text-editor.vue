@@ -5,7 +5,6 @@
 
         <div class="preview_block">
             <!-- background for post preview insert this -->
-
         </div>
 
         <div class="edit-buttons">
@@ -35,7 +34,13 @@
         <div style="width: 1000px; position: relative;"  id="editable_area">
 
             <div class="header-post-theme">
-                <label for="post_theme" id="label_post_theme" >ТАЙТЛ</label>
+                <label for="post_theme" id="label_post_theme">
+                    <pre id="label_post_theme_t">T</pre>
+                    <pre id="label_post_theme_i">А</pre>
+                    <pre id="label_post_theme_t2">Й</pre>
+                    <pre id="label_post_theme_l">T</pre>
+                    <pre id="label_post_theme_e">Л</pre>
+                </label>
                 <input id="post_theme" type="text" >
                 <!--<div class="dop-block"></div>-->
             </div>
@@ -581,15 +586,76 @@
     }
 
     #label_post_theme{
+        /*display: inline;*/
 
-        animation-name: woops_boom1, woops_boom2, woops_boom2_2, woops_boom2_6, woops_boom2_8, woops_boom3;
-        animation-duration: 2s, 0.1s, 0.1s, 0.1s, 0.1s, 3s; /* Продолжительность анимации */
-        animation-delay: 4s, 6s, 6.1s, 6.2s, 6.3s, 6.4s, 9.4s; /* Задержка */
-        animation-fill-mode: forwards, forwards;
-        animation-timing-function: linear, step-end, linear, step-end, linear, linear;
+        /*animation-name: woops_boom1, woops_boom2, woops_boom2_2, woops_boom2_6, woops_boom2_8, woops_boom3;*/
+        /*animation-duration: 2s, 0.1s, 0.1s, 0.1s, 0.1s, 3s; !* Продолжительность анимации *!*/
+        /*animation-delay: 4s, 6s, 6.1s, 6.2s, 6.3s, 6.4s, 9.4s; !* Задержка *!*/
+        /*animation-fill-mode: forwards, forwards;*/
+        /*animation-timing-function: linear, step-end, linear, step-end, linear, linear;*/
 
-        /*animation: woops_boom1 2.5s infinite normal forwards, woops_boom2 3s infinite normal step-end forwards;*/
+        /*animation: woops_boom1 2.5s infinite normal forwards, woops_boom2 3s infinite normal step-end forwards;z*/
         z-index: 1;
+    }
+
+    @keyframes jump {
+        0%, 20%{
+            transform: translateY(0);
+        }
+
+        10%{
+            transform: translateY(-5px);
+        }
+
+
+        100%{
+            transform: translateY(0);
+        }
+    }
+
+    #label_post_theme_t{
+        display: inline-block;
+        animation-name: jump;
+        animation-duration: 5s;
+        animation-delay: 6s;
+        animation-iteration-count:  infinite;
+        animation-timing-function: linear;
+    }
+    #label_post_theme_i{
+        display: inline-block;
+        animation-name: jump;
+        animation-duration: 5s;
+        animation-delay: 6s;
+        animation-iteration-count:  infinite;
+        animation-timing-function: linear;
+    }
+    #label_post_theme_t2{
+        /*display: inline;*/
+        display: inline-block;
+        animation-name: jump;
+        animation-duration: 5s;
+        animation-delay: 6s;
+        animation-iteration-count:  infinite;
+        animation-timing-function: linear;
+    }
+    #label_post_theme_l{
+        /*display: inline;*/
+        display: inline-block;
+        animation-name: jump;
+        animation-duration: 5s;
+        animation-delay: 6s;
+        animation-iteration-count:  infinite;
+        animation-timing-function: linear;
+    }
+
+    #label_post_theme_e{
+        /*display: inline;*/
+        display: inline-block;
+        animation-name: jump;
+        animation-duration: 5s;
+        animation-delay: 6s;
+        animation-iteration-count:  infinite;
+        animation-timing-function: linear;
     }
 
     .header-post-theme{
